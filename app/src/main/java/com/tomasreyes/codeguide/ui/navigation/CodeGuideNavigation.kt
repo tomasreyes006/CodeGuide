@@ -5,8 +5,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.tomasreyes.codeguide.ui.screens.FocusScreen
 import com.tomasreyes.codeguide.ui.screens.ForgotPasswordScreen
 import com.tomasreyes.codeguide.ui.screens.LoginScreen
+import com.tomasreyes.codeguide.ui.screens.MetricsScreen
 import com.tomasreyes.codeguide.ui.screens.ProjectsScreen
 import com.tomasreyes.codeguide.ui.screens.RegisterScreen
 import com.tomasreyes.codeguide.ui.screens.TodayScreen
@@ -17,6 +19,8 @@ sealed class CodeGuideScreen(val route: String) {
     object ForgotPassword : CodeGuideScreen("forgot_password")
     object Home : CodeGuideScreen("home")
     object Projects : CodeGuideScreen("projects")
+    object Focus : CodeGuideScreen("focus")
+    object Metrics : CodeGuideScreen("metrics")
 }
 
 @Composable
@@ -73,6 +77,16 @@ fun CodeGuideNavigation(
                     navController.navigate(CodeGuideScreen.Projects.route) {
                         launchSingleTop = true
                     }
+                },
+                onNavigateToFocus = {
+                    navController.navigate(CodeGuideScreen.Focus.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToMetrics = {
+                    navController.navigate(CodeGuideScreen.Metrics.route) {
+                        launchSingleTop = true
+                    }
                 }
             )
         }
@@ -81,6 +95,56 @@ fun CodeGuideNavigation(
             ProjectsScreen(
                 onNavigateToToday = {
                     navController.navigate(CodeGuideScreen.Home.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToFocus = {
+                    navController.navigate(CodeGuideScreen.Focus.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToMetrics = {
+                    navController.navigate(CodeGuideScreen.Metrics.route) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
+        composable(CodeGuideScreen.Focus.route) {
+            FocusScreen(
+                onNavigateToToday = {
+                    navController.navigate(CodeGuideScreen.Home.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToProjects = {
+                    navController.navigate(CodeGuideScreen.Projects.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToMetrics = {
+                    navController.navigate(CodeGuideScreen.Metrics.route) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
+        composable(CodeGuideScreen.Metrics.route) {
+            MetricsScreen(
+                onNavigateToToday = {
+                    navController.navigate(CodeGuideScreen.Home.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToProjects = {
+                    navController.navigate(CodeGuideScreen.Projects.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToFocus = {
+                    navController.navigate(CodeGuideScreen.Focus.route) {
                         launchSingleTop = true
                     }
                 }
