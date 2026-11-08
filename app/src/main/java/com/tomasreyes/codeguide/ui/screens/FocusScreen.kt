@@ -22,13 +22,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Coffee
 import androidx.compose.material.icons.filled.Eco
-import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.GraphicEq
+import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.Laptop
 import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material.icons.filled.WaterDrop
@@ -41,6 +42,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +57,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tomasreyes.codeguide.data.model.AmbientAudio
+import com.tomasreyes.codeguide.data.model.FocusMood
+import com.tomasreyes.codeguide.ui.components.CodeGuideBottomNavigationBar
 import com.tomasreyes.codeguide.ui.components.CodeGuideLogo
 import com.tomasreyes.codeguide.ui.theme.CodeGuideBackground
 import com.tomasreyes.codeguide.ui.theme.CodeGuideBadgeBg
@@ -67,17 +74,20 @@ import com.tomasreyes.codeguide.ui.theme.CodeGuideTeal
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTextPrimary
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTextSecondary
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTheme
+import com.tomasreyes.codeguide.ui.viewmodel.CodeGuideViewModel
 
 /**
- * Pantalla: "Enfoque" (Temporizador Pomodoro / Sesión de Flujo sin Interrupciones)
- * Maquetación stateless basada en el diseño de CodeGuide.
+ * Pantalla: "Enfoque" (Temporizador Interactivo con ViewModel)
  */
 @Composable
 fun FocusScreen(
+    viewModel: CodeGuideViewModel = viewModel(),
     onNavigateToToday: () -> Unit = {},
     onNavigateToProjects: () -> Unit = {},
     onNavigateToMetrics: () -> Unit = {}
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
     Scaffold(
         bottomBar = {
             CodeGuideBottomNavigationBar(
@@ -114,31 +124,45 @@ fun FocusScreen(
                     .padding(horizontal = 20.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp)
             ) {
-                // 1. Encabezado Superior (Logo + ENFOQUE + Racha + Avatar)
-                HeaderBarFocus()
+                // 1. Header
+                HeaderBarFocus(streakDays = uiState.streakDays)
 
-                // 2. Sesión de Flujo
+                // 2. Sesión
                 FlowSessionHeaderCard()
 
-                // 3. Nivel de Energía & Mood Selector
-                EnergyAndMoodCard()
+                // 3. Mood Selector
+                EnergyAndMoodCard(
+                    selectedMood = uiState.focusMood,
+                    onMoodSelected = { mood -> viewModel.selectFocusMood(mood) }
+                )
 
-                // 4. Temporizador de Enfoque Circular ("08:16")
-                CircularTimerCard()
+                // 4. Temporizador
+                CircularTimerCard(
+                    formattedTime = uiState.formattedTimerText,
+                    isRunning = uiState.isTimerRunning
+                )
 
-                // 5. Tarjeta de Micro-tarea Activa
-                ActiveMicroTaskCard()
+                // 5. Micro-tarea Activa
+                ActiveMicroTaskCard(taskTitle = uiState.activeFocusTaskTitle)
 
-                // 6. Botones de Control Principal (Pausar / Completar / Micro-break)
-                FocusControlButtons()
+                // 6. Botones de Control
+                FocusControlButtons(
+                    isRunning = uiState.isTimerRunning,
+                    onStartPause = { viewModel.startOrPauseTimer() },
+                    onComplete = { viewModel.completeFocusBlock() },
+                    onTakeBreak = { viewModel.startBreak(5) }
+                )
 
-                // 7. Audio de Acompañamiento
-                AmbientAudioCard()
+                // 7. Audio Selector
+                AmbientAudioCard(
+                    selectedAudio = uiState.activeAudio,
+                    onAudioSelected = { audio -> viewModel.selectAmbientAudio(audio) }
+                )
 
-                // 8. Cita de Arquitectura Mental
+                // 8. Cita
                 MentalArchitectureQuoteCard()
 
-                // 9. Consejos de Ritmo Sostenible
+                // 9. Ritmo Sostenible
                 SustainableRhythmCard()
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -147,9 +171,8 @@ fun FocusScreen(
     }
 }
 
-// 1. Encabezado Superior Focus
 @Composable
-private fun HeaderBarFocus() {
+private fun HeaderBarFocus(streakDays: Int) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -192,7 +215,7 @@ private fun HeaderBarFocus() {
                     Text(text = "🔥", fontSize = 13.sp)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "5d",
+                        text = "${streakDays}d",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = CodeGuideNavy
@@ -228,7 +251,6 @@ private fun HeaderBarFocus() {
     }
 }
 
-// 2. Tarjeta: Sesión de Flujo Header
 @Composable
 private fun FlowSessionHeaderCard() {
     Surface(
@@ -304,9 +326,11 @@ private fun FlowSessionHeaderCard() {
     }
 }
 
-// 3. Tarjeta: Nivel de Energía & Mood
 @Composable
-private fun EnergyAndMoodCard() {
+private fun EnergyAndMoodCard(
+    selectedMood: FocusMood,
+    onMoodSelected: (FocusMood) -> Unit
+) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -334,7 +358,7 @@ private fun EnergyAndMoodCard() {
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "25 min estándar",
+                        text = "${selectedMood.minutes} min seleccionado",
                         fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
                         color = CodeGuideLink
@@ -356,32 +380,16 @@ private fun EnergyAndMoodCard() {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Modo 1: Zen / Flow (Seleccionado)
-                MoodCard(
-                    modifier = Modifier.weight(1f),
-                    emoji = "🧘",
-                    title = "Zen / Flow",
-                    duration = "25 min",
-                    isSelected = true
-                )
-
-                // Modo 2: Energético
-                MoodCard(
-                    modifier = Modifier.weight(1f),
-                    emoji = "⚡",
-                    title = "Energético",
-                    duration = "45 min",
-                    isSelected = false
-                )
-
-                // Modo 3: Ligero / Fatiga
-                MoodCard(
-                    modifier = Modifier.weight(1f),
-                    emoji = "☕",
-                    title = "Ligero / Fatiga",
-                    duration = "15 min",
-                    isSelected = false
-                )
+                FocusMood.entries.forEach { mood ->
+                    MoodCard(
+                        modifier = Modifier.weight(1f),
+                        emoji = mood.emoji,
+                        title = mood.title,
+                        duration = "${mood.minutes} min",
+                        isSelected = mood == selectedMood,
+                        onClick = { onMoodSelected(mood) }
+                    )
+                }
             }
         }
     }
@@ -393,9 +401,11 @@ private fun MoodCard(
     emoji: String,
     title: String,
     duration: String,
-    isSelected: Boolean
+    isSelected: Boolean,
+    onClick: () -> Unit
 ) {
     Surface(
+        onClick = onClick,
         modifier = modifier.height(86.dp),
         shape = RoundedCornerShape(14.dp),
         color = if (isSelected) CodeGuidePasskeyBg else CodeGuideSurface,
@@ -427,9 +437,11 @@ private fun MoodCard(
     }
 }
 
-// 4. Tarjeta: Temporizador Circular
 @Composable
-private fun CircularTimerCard() {
+private fun CircularTimerCard(
+    formattedTime: String,
+    isRunning: Boolean
+) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -446,15 +458,12 @@ private fun CircularTimerCard() {
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.size(200.dp)
             ) {
-                // Anillo de progreso circular Canvas
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val strokeWidth = 14.dp.toPx()
-                    // Fondo del anillo
                     drawCircle(
                         color = Color(0xFFE2E8F0),
                         style = Stroke(width = strokeWidth)
                     )
-                    // Arco del anillo activo (~45% transcurrido)
                     drawArc(
                         brush = Brush.sweepGradient(
                             colors = listOf(
@@ -464,7 +473,7 @@ private fun CircularTimerCard() {
                             )
                         ),
                         startAngle = -90f,
-                        sweepAngle = 160f,
+                        sweepAngle = if (isRunning) 220f else 160f,
                         useCenter = false,
                         style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                     )
@@ -483,7 +492,7 @@ private fun CircularTimerCard() {
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = "08:16",
+                        text = formattedTime,
                         fontSize = 38.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.SansSerif,
@@ -495,14 +504,14 @@ private fun CircularTimerCard() {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(50.dp))
-                            .background(CodeGuidePasskeyBg)
+                            .background(if (isRunning) CodeGuideBadgeBg else CodeGuidePasskeyBg)
                             .padding(horizontal = 12.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = "Bloque activo",
+                            text = if (isRunning) "En marcha..." else "Bloque listo",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = CodeGuideLink
+                            color = if (isRunning) CodeGuideTeal else CodeGuideLink
                         )
                     }
                 }
@@ -511,9 +520,8 @@ private fun CircularTimerCard() {
     }
 }
 
-// 5. Tarjeta: Micro-tarea Activa
 @Composable
-private fun ActiveMicroTaskCard() {
+private fun ActiveMicroTaskCard(taskTitle: String) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -543,7 +551,7 @@ private fun ActiveMicroTaskCard() {
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "MICRO-TAREA 2 DE 4",
+                        text = "MICRO-TAREA ACTIVA",
                         fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
@@ -569,7 +577,7 @@ private fun ActiveMicroTaskCard() {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Definir middleware de validación JWT",
+                text = taskTitle,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 color = CodeGuideNavy
@@ -590,17 +598,20 @@ private fun ActiveMicroTaskCard() {
     }
 }
 
-// 6. Botones de Control Principal
 @Composable
-private fun FocusControlButtons() {
+private fun FocusControlButtons(
+    isRunning: Boolean,
+    onStartPause: () -> Unit,
+    onComplete: () -> Unit,
+    onTakeBreak: () -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // Botón Pausar
             Button(
-                onClick = { },
+                onClick = onStartPause,
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp),
@@ -609,14 +620,14 @@ private fun FocusControlButtons() {
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.Pause,
-                        contentDescription = "Pause",
+                        imageVector = if (isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        contentDescription = "Start/Pause",
                         tint = Color.White,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Pausar",
+                        text = if (isRunning) "Pausar" else "Reanudar",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -624,9 +635,8 @@ private fun FocusControlButtons() {
                 }
             }
 
-            // Botón Completar
             Button(
-                onClick = { },
+                onClick = onComplete,
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp),
@@ -651,9 +661,8 @@ private fun FocusControlButtons() {
             }
         }
 
-        // Botón Micro-break
         OutlinedButton(
-            onClick = { },
+            onClick = onTakeBreak,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(46.dp),
@@ -680,9 +689,11 @@ private fun FocusControlButtons() {
     }
 }
 
-// 7. Tarjeta: Audio de Acompañamiento
 @Composable
-private fun AmbientAudioCard() {
+private fun AmbientAudioCard(
+    selectedAudio: AmbientAudio,
+    onAudioSelected: (AmbientAudio) -> Unit
+) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -713,7 +724,7 @@ private fun AmbientAudioCard() {
                 }
 
                 Text(
-                    text = "Lofi Coding",
+                    text = selectedAudio.label,
                     fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
@@ -730,22 +741,25 @@ private fun AmbientAudioCard() {
                 AudioOptionChip(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Default.GraphicEq,
-                    text = "Lofi Coding",
-                    isSelected = true
+                    text = AmbientAudio.LOFI.label,
+                    isSelected = selectedAudio == AmbientAudio.LOFI,
+                    onClick = { onAudioSelected(AmbientAudio.LOFI) }
                 )
 
                 AudioOptionChip(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Default.WaterDrop,
-                    text = "Lluvia suave",
-                    isSelected = false
+                    text = AmbientAudio.RAIN.label,
+                    isSelected = selectedAudio == AmbientAudio.RAIN,
+                    onClick = { onAudioSelected(AmbientAudio.RAIN) }
                 )
 
                 AudioOptionChip(
                     modifier = Modifier.weight(1f),
                     icon = Icons.AutoMirrored.Filled.VolumeOff,
-                    text = "Silencio",
-                    isSelected = false
+                    text = AmbientAudio.SILENCE.label,
+                    isSelected = selectedAudio == AmbientAudio.SILENCE,
+                    onClick = { onAudioSelected(AmbientAudio.SILENCE) }
                 )
             }
         }
@@ -757,9 +771,11 @@ private fun AudioOptionChip(
     modifier: Modifier = Modifier,
     icon: ImageVector,
     text: String,
-    isSelected: Boolean
+    isSelected: Boolean,
+    onClick: () -> Unit
 ) {
     Surface(
+        onClick = onClick,
         modifier = modifier.height(44.dp),
         shape = RoundedCornerShape(12.dp),
         color = if (isSelected) CodeGuidePasskeyBg else CodeGuideSurface,
@@ -790,7 +806,6 @@ private fun AudioOptionChip(
     }
 }
 
-// 8. Cita de Arquitectura Mental
 @Composable
 private fun MentalArchitectureQuoteCard() {
     Surface(
@@ -828,7 +843,6 @@ private fun MentalArchitectureQuoteCard() {
     }
 }
 
-// 9. Consejos de Ritmo Sostenible
 @Composable
 private fun SustainableRhythmCard() {
     Surface(

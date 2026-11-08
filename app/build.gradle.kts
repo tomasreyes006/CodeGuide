@@ -37,6 +37,9 @@ android {
 
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.navigation.compose)

@@ -20,34 +20,36 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,6 +62,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tomasreyes.codeguide.data.model.EnergyLevel
+import com.tomasreyes.codeguide.data.model.MicroTask
+import com.tomasreyes.codeguide.ui.components.CodeGuideBottomNavigationBar
 import com.tomasreyes.codeguide.ui.components.CodeGuideLogo
 import com.tomasreyes.codeguide.ui.theme.CodeGuideBackground
 import com.tomasreyes.codeguide.ui.theme.CodeGuideBadgeBg
@@ -73,17 +79,21 @@ import com.tomasreyes.codeguide.ui.theme.CodeGuideTeal
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTextPrimary
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTextSecondary
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTheme
+import com.tomasreyes.codeguide.ui.viewmodel.CodeGuideViewModel
 
 /**
- * Pantalla Principal: "Hoy" (Proyectos del Día & Calibración de Energía)
- * Maquetación stateless basada en el diseño de CodeGuide.
+ * Pantalla Principal: "Hoy" (Totalmente Funcional con ViewModel)
  */
 @Composable
 fun TodayScreen(
+    viewModel: CodeGuideViewModel = viewModel(),
     onNavigateToProjects: () -> Unit = {},
     onNavigateToFocus: () -> Unit = {},
     onNavigateToMetrics: () -> Unit = {}
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+    var showAddTaskDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         bottomBar = {
             CodeGuideBottomNavigationBar(
@@ -120,33 +130,53 @@ fun TodayScreen(
                     .padding(horizontal = 20.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                // 1. Barra de Encabezado Superior (Logo + Racha + Avatar)
-                HeaderBar()
+                // 1. Encabezado
+                HeaderBar(streakDays = uiState.streakDays)
 
-                // 2. Seccion: Calibración Mental
-                MentalCalibrationCard()
+                // 2. Calibración Mental Funcional
+                MentalCalibrationCard(
+                    selectedEnergy = uiState.energyLevel,
+                    onEnergySelected = { level -> viewModel.setEnergyLevel(level) }
+                )
 
-                // 3. Seccion: Sugerencia IA • Enfoque Inmediato
-                AiSuggestionCard()
+                // 3. Sugerencia IA
+                AiSuggestionCard(onStartFocus = onNavigateToFocus)
 
-                // 4. Seccion: Ruta de Hoy (Checklist de Objetivos)
-                TodayRouteSection()
+                // 4. Ruta de Hoy (Checklist Interactivo)
+                TodayRouteSection(
+                    tasks = uiState.dailyTasks,
+                    completedCount = uiState.completedDailyTasksCount,
+                    totalCount = uiState.totalDailyTasksCount,
+                    progressPercentage = uiState.dailyProgressPercentage,
+                    onTaskToggle = { taskId -> viewModel.toggleDailyTask(taskId) },
+                    onAddNewTaskClick = { showAddTaskDialog = true }
+                )
 
-                // 5. Seccion: Promo Desglosar Tarea Monolítica
-                BreakdownTaskCard()
+                // 5. Promo Desglosar
+                BreakdownTaskCard(onBreakdownClick = { showAddTaskDialog = true })
 
-                // 6. Cita / Frase del Día
+                // 6. Frase del Día
                 DailyQuoteCard()
 
                 Spacer(modifier = Modifier.height(12.dp))
+            }
+
+            // Dialog para agregar nueva tarea
+            if (showAddTaskDialog) {
+                AddTaskDialog(
+                    onDismiss = { showAddTaskDialog = false },
+                    onTaskAdded = { title, desc, duration, tag ->
+                        viewModel.addDailyTask(title, desc, duration, tag)
+                        showAddTaskDialog = false
+                    }
+                )
             }
         }
     }
 }
 
-// 1. Encabezado Superior
 @Composable
-private fun HeaderBar() {
+private fun HeaderBar(streakDays: Int) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -177,7 +207,6 @@ private fun HeaderBar() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Chip de Racha
             Surface(
                 shape = RoundedCornerShape(50.dp),
                 color = CodeGuidePasskeyBg,
@@ -190,7 +219,7 @@ private fun HeaderBar() {
                     Text(text = "🔥", fontSize = 13.sp)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "5d",
+                        text = "${streakDays}d",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = CodeGuideNavy
@@ -198,7 +227,6 @@ private fun HeaderBar() {
                 }
             }
 
-            // Avatar de usuario con indicador online
             Box(contentAlignment = Alignment.BottomEnd) {
                 Surface(
                     shape = CircleShape,
@@ -227,9 +255,11 @@ private fun HeaderBar() {
     }
 }
 
-// 2. Tarjeta: Calibración Mental
 @Composable
-private fun MentalCalibrationCard() {
+private fun MentalCalibrationCard(
+    selectedEnergy: EnergyLevel,
+    onEnergySelected: (EnergyLevel) -> Unit
+) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -237,7 +267,6 @@ private fun MentalCalibrationCard() {
         border = BorderStroke(1.dp, CodeGuideBorder)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
-            // Fila superior: Ícono + Título + Badge Realtime
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -295,42 +324,40 @@ private fun MentalCalibrationCard() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Fila de 3 Niveles de Energía
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Opción 1: Suave
                 EnergyOptionCard(
                     modifier = Modifier.weight(1f),
-                    title = "Suave",
-                    subtitle = "Docs & Fixes",
+                    title = EnergyLevel.SUAVE.title,
+                    subtitle = EnergyLevel.SUAVE.subtitle,
                     icon = Icons.Default.Eco,
-                    isSelected = false
+                    isSelected = selectedEnergy == EnergyLevel.SUAVE,
+                    onClick = { onEnergySelected(EnergyLevel.SUAVE) }
                 )
 
-                // Opción 2: Óptima (Seleccionada)
                 EnergyOptionCard(
                     modifier = Modifier.weight(1f),
-                    title = "Óptima",
-                    subtitle = "Features STD",
+                    title = EnergyLevel.OPTIMA.title,
+                    subtitle = EnergyLevel.OPTIMA.subtitle,
                     icon = Icons.Default.Tune,
-                    isSelected = true
+                    isSelected = selectedEnergy == EnergyLevel.OPTIMA,
+                    onClick = { onEnergySelected(EnergyLevel.OPTIMA) }
                 )
 
-                // Opción 3: Profunda
                 EnergyOptionCard(
                     modifier = Modifier.weight(1f),
-                    title = "Profunda",
-                    subtitle = "Arquitectura",
+                    title = EnergyLevel.PROFUNDA.title,
+                    subtitle = EnergyLevel.PROFUNDA.subtitle,
                     icon = Icons.Default.Bolt,
-                    isSelected = false
+                    isSelected = selectedEnergy == EnergyLevel.PROFUNDA,
+                    onClick = { onEnergySelected(EnergyLevel.PROFUNDA) }
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Indicador de capacidad recomendada
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -351,7 +378,7 @@ private fun MentalCalibrationCard() {
                             color = CodeGuideTextPrimary
                         )
                         Text(
-                            text = "3 micro-tareas",
+                            text = selectedEnergy.recommendedCapacity,
                             fontSize = 12.sp,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
@@ -359,21 +386,16 @@ private fun MentalCalibrationCard() {
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(2.dp))
-
-                    Text(
-                        text = "(~2h 15m) sin fatiga mental.",
-                        fontSize = 12.sp,
-                        fontFamily = FontFamily.Monospace,
-                        color = CodeGuideLink,
-                        modifier = Modifier.padding(start = 24.dp)
-                    )
-
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Barra de progreso de capacidad
                     LinearProgressIndicator(
-                        progress = { 0.65f },
+                        progress = {
+                            when (selectedEnergy) {
+                                EnergyLevel.SUAVE -> 0.35f
+                                EnergyLevel.OPTIMA -> 0.65f
+                                EnergyLevel.PROFUNDA -> 0.90f
+                            }
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(6.dp)
@@ -393,9 +415,11 @@ private fun EnergyOptionCard(
     title: String,
     subtitle: String,
     icon: ImageVector,
-    isSelected: Boolean
+    isSelected: Boolean,
+    onClick: () -> Unit
 ) {
     Surface(
+        onClick = onClick,
         modifier = modifier.height(84.dp),
         shape = RoundedCornerShape(14.dp),
         color = if (isSelected) CodeGuidePasskeyBg else CodeGuideSurface,
@@ -431,16 +455,14 @@ private fun EnergyOptionCard(
     }
 }
 
-// 3. Tarjeta: Sugerencia IA (Dark Navy)
 @Composable
-private fun AiSuggestionCard() {
+private fun AiSuggestionCard(onStartFocus: () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         color = CodeGuideNavy
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            // Header Sugerencia IA + Badge Prioridad
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -485,8 +507,7 @@ private fun AiSuggestionCard() {
                 text = "PROYECTO: AUTH & API GATEWAY",
                 fontSize = 11.sp,
                 fontFamily = FontFamily.Monospace,
-                color = CodeGuideCyan,
-                letterSpacing = 0.5.sp
+                color = CodeGuideCyan
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -508,23 +529,10 @@ private fun AiSuggestionCard() {
                 lineHeight = 16.sp
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Badges de detalles
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                DetailChip(icon = Icons.Default.Schedule, text = "25 min")
-                DetailChip(icon = Icons.Default.Speed, text = "Carga Media")
-                DetailChip(icon = Icons.Default.CheckCircle, text = "Bloque Único")
-            }
-
             Spacer(modifier = Modifier.height(18.dp))
 
-            // Botón de Iniciar Bloque de Enfoque
             Button(
-                onClick = { },
+                onClick = onStartFocus,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(46.dp),
@@ -552,37 +560,14 @@ private fun AiSuggestionCard() {
 }
 
 @Composable
-private fun DetailChip(
-    icon: ImageVector,
-    text: String
+private fun TodayRouteSection(
+    tasks: List<MicroTask>,
+    completedCount: Int,
+    totalCount: Int,
+    progressPercentage: Int,
+    onTaskToggle: (String) -> Unit,
+    onAddNewTaskClick: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(50.dp))
-            .background(Color.White.copy(alpha = 0.12f))
-            .padding(horizontal = 10.dp, vertical = 5.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = icon,
-                contentDescription = text,
-                tint = Color.White,
-                modifier = Modifier.size(13.dp)
-            )
-            Spacer(modifier = Modifier.width(5.dp))
-            Text(
-                text = text,
-                fontSize = 11.sp,
-                fontFamily = FontFamily.Monospace,
-                color = Color.White
-            )
-        }
-    }
-}
-
-// 4. Seccion: Ruta de Hoy (Checklist de Objetivos)
-@Composable
-private fun TodayRouteSection() {
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -597,78 +582,58 @@ private fun TodayRouteSection() {
                     color = CodeGuideNavy
                 )
                 Text(
-                    text = "2 de 4 micro-tareas completadas",
+                    text = "$completedCount de $totalCount micro-tareas completadas",
                     fontSize = 12.sp,
                     color = CodeGuideTextSecondary
                 )
             }
 
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50.dp))
-                    .background(CodeGuidePasskeyBg)
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text = "50% Listo",
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    color = CodeGuideLink
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onAddNewTaskClick) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add Task",
+                        tint = CodeGuideNavy
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50.dp))
+                        .background(CodeGuidePasskeyBg)
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = "$progressPercentage% Listo",
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        color = CodeGuideLink
+                    )
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // Lista de Tareas
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            // Tarea 1: Completada
-            TaskCheckItem(
-                title = "Revisar PR #142: Schemas Zod",
-                duration = "15m",
-                tags = listOf("Fácil • Code Review"),
-                isCompleted = true
-            )
-
-            // Tarea 2: Completada
-            TaskCheckItem(
-                title = "Actualizar variables en Dockerfile",
-                duration = "20m",
-                tags = listOf("Fácil • DevOps"),
-                isCompleted = true
-            )
-
-            // Tarea 3: Pendiente
-            TaskCheckItem(
-                title = "Crear handler de Refresh Token",
-                description = "Rotación de tokens y almacenamiento en HTTP-Only...",
-                duration = "35m",
-                tags = listOf("Moderado • Backend", "Auth Project"),
-                isCompleted = false
-            )
-
-            // Tarea 4: Pendiente
-            TaskCheckItem(
-                title = "Redactar Readme de integración OpenAPI",
-                description = "Ejemplos de llamadas cURL para el equipo de...",
-                duration = "25m",
-                tags = listOf("Baja Carga • Documentación"),
-                isCompleted = false
-            )
+            tasks.forEach { task ->
+                TaskCheckItem(
+                    task = task,
+                    onToggle = { onTaskToggle(task.id) }
+                )
+            }
         }
     }
 }
 
 @Composable
 private fun TaskCheckItem(
-    title: String,
-    description: String? = null,
-    duration: String,
-    tags: List<String>,
-    isCompleted: Boolean
+    task: MicroTask,
+    onToggle: () -> Unit
 ) {
     Surface(
+        onClick = onToggle,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         color = CodeGuideSurface,
@@ -678,20 +643,19 @@ private fun TaskCheckItem(
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.Top
         ) {
-            // Checkbox Icon
             Box(
                 modifier = Modifier
                     .size(24.dp)
                     .clip(RoundedCornerShape(6.dp))
-                    .background(if (isCompleted) CodeGuideTeal else CodeGuidePasskeyBg)
+                    .background(if (task.isCompleted) CodeGuideTeal else CodeGuidePasskeyBg)
                     .border(
                         width = 1.dp,
-                        color = if (isCompleted) CodeGuideTeal else CodeGuideBorder,
+                        color = if (task.isCompleted) CodeGuideTeal else CodeGuideBorder,
                         shape = RoundedCornerShape(6.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (isCompleted) {
+                if (task.isCompleted) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = "Checked",
@@ -710,24 +674,24 @@ private fun TaskCheckItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = title,
+                        text = task.title,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (isCompleted) CodeGuideTextSecondary else CodeGuideTextPrimary,
-                        textDecoration = if (isCompleted) TextDecoration.LineThrough else TextDecoration.None
+                        color = if (task.isCompleted) CodeGuideTextSecondary else CodeGuideTextPrimary,
+                        textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None
                     )
                     Text(
-                        text = duration,
+                        text = "${task.durationMinutes}m",
                         fontSize = 12.sp,
                         fontFamily = FontFamily.Monospace,
                         color = CodeGuideTextSecondary
                     )
                 }
 
-                if (!description.isNullOrEmpty()) {
+                if (!task.description.isNullOrEmpty()) {
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = description,
+                        text = task.description,
                         fontSize = 12.sp,
                         color = CodeGuideTextSecondary,
                         lineHeight = 15.sp
@@ -737,7 +701,7 @@ private fun TaskCheckItem(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    tags.forEach { tag ->
+                    task.tags.forEach { tag ->
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(50.dp))
@@ -753,7 +717,7 @@ private fun TaskCheckItem(
                         }
                     }
 
-                    if (isCompleted) {
+                    if (task.isCompleted) {
                         Text(
                             text = "Completada",
                             fontSize = 10.sp,
@@ -769,10 +733,10 @@ private fun TaskCheckItem(
     }
 }
 
-// 5. Tarjeta: Promo Desglosar Tarea
 @Composable
-private fun BreakdownTaskCard() {
+private fun BreakdownTaskCard(onBreakdownClick: () -> Unit) {
     Surface(
+        onClick = onBreakdownClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = CodeGuideSurface,
@@ -810,7 +774,7 @@ private fun BreakdownTaskCard() {
                         color = CodeGuideNavy
                     )
                     Text(
-                        text = "Deja que CodeGuide la d...",
+                        text = "Deja que CodeGuide la desglose",
                         fontSize = 12.sp,
                         color = CodeGuideTextSecondary
                     )
@@ -818,7 +782,7 @@ private fun BreakdownTaskCard() {
             }
 
             Button(
-                onClick = { },
+                onClick = onBreakdownClick,
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = CodeGuideNavy)
             ) {
@@ -837,7 +801,6 @@ private fun BreakdownTaskCard() {
     }
 }
 
-// 6. Tarjeta: Cita Diaria
 @Composable
 private fun DailyQuoteCard() {
     Surface(
@@ -866,96 +829,68 @@ private fun DailyQuoteCard() {
     }
 }
 
-// Barra de Navegación Inferior
 @Composable
-fun CodeGuideBottomNavigationBar(
-    selectedTab: String,
-    onTabSelected: (String) -> Unit
+private fun AddTaskDialog(
+    onDismiss: () -> Unit,
+    onTaskAdded: (String, String?, Int, String) -> Unit
 ) {
-    NavigationBar(
-        containerColor = CodeGuideSurface,
-        tonalElevation = 8.dp
-    ) {
-        // Tab 1: Hoy
-        NavigationBarItem(
-            selected = selectedTab == "Hoy",
-            onClick = { onTabSelected("Hoy") },
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.LightMode,
-                    contentDescription = "Hoy"
-                )
-            },
-            label = { Text(text = "Hoy", fontSize = 11.sp, fontWeight = FontWeight.SemiBold) },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = CodeGuideNavy,
-                selectedTextColor = CodeGuideNavy,
-                indicatorColor = CodeGuidePasskeyBg,
-                unselectedIconColor = CodeGuideTextSecondary,
-                unselectedTextColor = CodeGuideTextSecondary
-            )
-        )
+    var title by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+    var duration by remember { mutableStateOf("20") }
+    var tag by remember { mutableStateOf("Desarrollo") }
 
-        // Tab 2: Proyectos
-        NavigationBarItem(
-            selected = selectedTab == "Proyectos",
-            onClick = { onTabSelected("Proyectos") },
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Folder,
-                    contentDescription = "Proyectos"
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = "Agregar Micro-tarea", fontWeight = FontWeight.Bold, color = CodeGuideNavy)
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Título de la tarea") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
                 )
-            },
-            label = { Text(text = "Proyectos", fontSize = 11.sp) },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = CodeGuideNavy,
-                selectedTextColor = CodeGuideNavy,
-                indicatorColor = CodeGuidePasskeyBg,
-                unselectedIconColor = CodeGuideTextSecondary,
-                unselectedTextColor = CodeGuideTextSecondary
-            )
-        )
-
-        // Tab 3: Enfoque
-        NavigationBarItem(
-            selected = selectedTab == "Enfoque",
-            onClick = { onTabSelected("Enfoque") },
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.Timer,
-                    contentDescription = "Enfoque"
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Descripción (opcional)") },
+                    modifier = Modifier.fillMaxWidth()
                 )
-            },
-            label = { Text(text = "Enfoque", fontSize = 11.sp) },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = CodeGuideNavy,
-                selectedTextColor = CodeGuideNavy,
-                indicatorColor = CodeGuidePasskeyBg,
-                unselectedIconColor = CodeGuideTextSecondary,
-                unselectedTextColor = CodeGuideTextSecondary
-            )
-        )
-
-        // Tab 4: Métricas
-        NavigationBarItem(
-            selected = selectedTab == "Métricas",
-            onClick = { onTabSelected("Métricas") },
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.BarChart,
-                    contentDescription = "Métricas"
+                OutlinedTextField(
+                    value = duration,
+                    onValueChange = { duration = it },
+                    label = { Text("Duración estimada (minutos)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
                 )
-            },
-            label = { Text(text = "Métricas", fontSize = 11.sp) },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = CodeGuideNavy,
-                selectedTextColor = CodeGuideNavy,
-                indicatorColor = CodeGuidePasskeyBg,
-                unselectedIconColor = CodeGuideTextSecondary,
-                unselectedTextColor = CodeGuideTextSecondary
-            )
-        )
-    }
+                OutlinedTextField(
+                    value = tag,
+                    onValueChange = { tag = it },
+                    label = { Text("Etiquetas (separadas por coma)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onTaskAdded(title, description, duration.toIntOrNull() ?: 20, tag)
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = CodeGuideNavy)
+            ) {
+                Text("Agregar")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss, colors = ButtonDefaults.buttonColors(containerColor = CodeGuideBorder)) {
+                Text("Cancelar", color = CodeGuideNavy)
+            }
+        }
+    )
 }
 
 @Preview(showBackground = true)

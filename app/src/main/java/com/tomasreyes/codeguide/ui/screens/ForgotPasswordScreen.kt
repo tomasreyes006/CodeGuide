@@ -25,12 +25,18 @@ import androidx.compose.material.icons.filled.MarkEmailUnread
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tomasreyes.codeguide.ui.components.CodeGuideLogo
 import com.tomasreyes.codeguide.ui.theme.CodeGuideBackground
 import com.tomasreyes.codeguide.ui.theme.CodeGuideBadgeBg
@@ -56,20 +63,18 @@ import com.tomasreyes.codeguide.ui.theme.CodeGuideTeal
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTextPrimary
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTextSecondary
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTheme
+import com.tomasreyes.codeguide.ui.viewmodel.AuthState
+import com.tomasreyes.codeguide.ui.viewmodel.AuthViewModel
 
-/**
- * Pestaña / Ventana de Recuperación de Contraseña
- *
- * NOTA PARA EL DESARROLLO CON FIREBASE:
- * Cuando integres Firebase Auth:
- * - import com.google.firebase.auth.FirebaseAuth
- * - Invoca: FirebaseAuth.getInstance().sendPasswordResetEmail(email)
- */
 @Composable
 fun ForgotPasswordScreen(
+    authViewModel: AuthViewModel = viewModel(),
     onNavigateToLogin: () -> Unit = {},
     onResetRequested: () -> Unit = {}
 ) {
+    var email by remember { mutableStateOf("") }
+    val authState by authViewModel.authState.collectAsState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -90,12 +95,10 @@ fun ForgotPasswordScreen(
                 .padding(horizontal = 24.dp, vertical = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 1. Logo del Proyecto
             CodeGuideLogo(iconSize = 72.dp)
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 2. Chip Badge
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(50.dp))
@@ -123,7 +126,6 @@ fun ForgotPasswordScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // 3. Título Principal
             Text(
                 text = "¿Olvidaste tu contraseña?",
                 fontSize = 24.sp,
@@ -134,7 +136,6 @@ fun ForgotPasswordScreen(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // 4. Subtítulo
             Text(
                 text = "Ingresa tu correo dev registrado y te enviaremos las instrucciones para restablecer tu contraseña maestra.",
                 fontSize = 13.sp,
@@ -146,7 +147,24 @@ fun ForgotPasswordScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Container Card
+            if (authState is AuthState.ResetSent) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color(0xFFECFDF5),
+                    border = BorderStroke(1.dp, CodeGuideTeal)
+                ) {
+                    Text(
+                        text = "¡Correo enviado con éxito a ${(authState as AuthState.ResetSent).email}! Revisa tu bandeja de entrada.",
+                        fontSize = 12.sp,
+                        color = CodeGuideTeal,
+                        modifier = Modifier.padding(10.dp)
+                    )
+                }
+            }
+
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -162,8 +180,8 @@ fun ForgotPasswordScreen(
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(
-                        value = "",
-                        onValueChange = {},
+                        value = email,
+                        onValueChange = { email = it },
                         placeholder = {
                             Text(
                                 text = "tu_alias@empresa.io",
@@ -174,7 +192,7 @@ fun ForgotPasswordScreen(
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.AlternateEmail,
-                                contentDescription = "Email Icon",
+                                contentDescription = "Email",
                                 tint = CodeGuideNavy.copy(alpha = 0.7f),
                                 modifier = Modifier.size(18.dp)
                             )
@@ -182,8 +200,6 @@ fun ForgotPasswordScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = CodeGuideSurface,
-                            unfocusedContainerColor = CodeGuideSurface,
                             focusedBorderColor = CodeGuideTeal,
                             unfocusedBorderColor = CodeGuideBorder
                         ),
@@ -193,7 +209,6 @@ fun ForgotPasswordScreen(
 
                     Spacer(modifier = Modifier.height(18.dp))
 
-                    // Nota de ayuda
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(10.dp),
@@ -221,29 +236,39 @@ fun ForgotPasswordScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Botón de Enviar
                     Button(
-                        onClick = { onResetRequested() },
+                        onClick = {
+                            authViewModel.sendPasswordReset(email)
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = CodeGuideNavy)
+                        colors = ButtonDefaults.buttonColors(containerColor = CodeGuideNavy),
+                        enabled = authState !is AuthState.Loading
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Send,
-                                contentDescription = "Send",
-                                tint = CodeGuideCyan,
-                                modifier = Modifier.size(18.dp)
+                        if (authState is AuthState.Loading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(22.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Enviar correo de recuperación",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
+                        } else {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Send,
+                                    contentDescription = "Send",
+                                    tint = CodeGuideCyan,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Enviar correo de recuperación",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
                         }
                     }
                 }
@@ -251,7 +276,6 @@ fun ForgotPasswordScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Link Volver al Login
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.clickable { onNavigateToLogin() }

@@ -29,10 +29,12 @@ import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,6 +44,11 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,10 +58,12 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tomasreyes.codeguide.ui.components.CodeGuideLogo
 import com.tomasreyes.codeguide.ui.theme.CodeGuideBackground
 import com.tomasreyes.codeguide.ui.theme.CodeGuideBadgeBg
@@ -68,23 +77,26 @@ import com.tomasreyes.codeguide.ui.theme.CodeGuideTeal
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTextPrimary
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTextSecondary
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTheme
+import com.tomasreyes.codeguide.ui.viewmodel.AuthState
+import com.tomasreyes.codeguide.ui.viewmodel.AuthViewModel
 
 /**
- * Ventana de Login (Inicio de Sesión en el Modo Flujo)
- * Maquetación siguiendo el diseño oficial de CodeGuide.
- *
- * NOTA PARA EL DESARROLLO CON FIREBASE:
- * Cuando integres la lógica de backend con Firebase Auth:
- * - import com.google.firebase.auth.FirebaseAuth
- * - Valida los campos de email y contraseña.
- * - Invoca: FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+ * Ventana de Login (Inicio de Sesión con Firebase Auth + Estados)
  */
 @Composable
 fun LoginScreen(
+    authViewModel: AuthViewModel = viewModel(),
     onNavigateToRegister: () -> Unit = {},
     onNavigateToForgotPassword: () -> Unit = {},
     onLoginSuccess: () -> Unit = {}
 ) {
+    var email by remember { mutableStateOf("dev@codeguide.io") }
+    var password by remember { mutableStateOf("123456789012") }
+    var isPasswordVisible by remember { mutableStateOf(false) }
+    var rememberDevice by remember { mutableStateOf(true) }
+
+    val authState by authViewModel.authState.collectAsState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -105,12 +117,12 @@ fun LoginScreen(
                 .padding(horizontal = 24.dp, vertical = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 1. Logo del Proyecto
+            // 1. Logo de la app
             CodeGuideLogo(iconSize = 72.dp)
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 2. Chip de versión / estado "ESPACIO COGNITIVO V2.4"
+            // 2. Chip de versión / estado
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(50.dp))
@@ -149,7 +161,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // 4. Subtítulo explicativo
+            // 4. Subtítulo
             Text(
                 text = "Sincroniza tus ramas, calibra tu energía mental diaria y programa sin sobrecarga cognitiva.",
                 fontSize = 13.sp,
@@ -161,10 +173,11 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 5. Botones de OAuth / Social
-            // Botón de GitHub
+            // 5. OAuth Social Sign-In
             Button(
-                onClick = { /* TODO: Firebase GitHub Auth */ },
+                onClick = {
+                    authViewModel.loginUser(email, password, onLoginSuccess)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
@@ -179,7 +192,7 @@ fun LoginScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.Code,
-                            contentDescription = "GitHub Icon",
+                            contentDescription = "GitHub",
                             tint = Color.White,
                             modifier = Modifier.size(20.dp)
                         )
@@ -202,21 +215,18 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Fila de GitLab y Workspace
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 OutlinedButton(
-                    onClick = { /* TODO: GitLab Auth */ },
+                    onClick = { authViewModel.loginUser(email, password, onLoginSuccess) },
                     modifier = Modifier
                         .weight(1f)
                         .height(44.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.outlinedButtonColors(containerColor = CodeGuideSurface),
-                    border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
-                        brush = Brush.horizontalGradient(listOf(CodeGuideBorder, CodeGuideBorder))
-                    )
+                    border = BorderStroke(1.dp, CodeGuideBorder)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = "🦊", fontSize = 14.sp)
@@ -231,15 +241,13 @@ fun LoginScreen(
                 }
 
                 OutlinedButton(
-                    onClick = { /* TODO: Google Workspace Auth */ },
+                    onClick = { authViewModel.loginUser(email, password, onLoginSuccess) },
                     modifier = Modifier
                         .weight(1f)
                         .height(44.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.outlinedButtonColors(containerColor = CodeGuideSurface),
-                    border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(
-                        brush = Brush.horizontalGradient(listOf(CodeGuideBorder, CodeGuideBorder))
-                    )
+                    border = BorderStroke(1.dp, CodeGuideBorder)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = "🌐", fontSize = 14.sp)
@@ -256,7 +264,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 6. Divisor con texto "O INGRESA CON TU CORREO DEV"
+            // 6. Divisor "O INGRESA CON TU CORREO DEV"
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -275,7 +283,26 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            // 7. Campo Email
+            // Mensaje de Error / Estado si aplica
+            if (authState is AuthState.Error) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color(0xFFFFE4E6),
+                    border = BorderStroke(1.dp, Color(0xFFE11D48))
+                ) {
+                    Text(
+                        text = (authState as AuthState.Error).message,
+                        fontSize = 12.sp,
+                        color = Color(0xFFE11D48),
+                        modifier = Modifier.padding(10.dp)
+                    )
+                }
+            }
+
+            // 7. Campo Email State
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -300,8 +327,8 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(6.dp))
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = email,
+                onValueChange = { email = it },
                 placeholder = {
                     Text(
                         text = "tu_alias@empresa.io",
@@ -312,7 +339,7 @@ fun LoginScreen(
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.AlternateEmail,
-                        contentDescription = "Email Icon",
+                        contentDescription = "Email",
                         tint = CodeGuideNavy.copy(alpha = 0.7f),
                         modifier = Modifier.size(18.dp)
                     )
@@ -331,7 +358,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // 8. Campo Contraseña
+            // 8. Campo Contraseña State
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -354,21 +381,21 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(6.dp))
 
             OutlinedTextField(
-                value = "123456789012",
-                onValueChange = {},
+                value = password,
+                onValueChange = { password = it },
                 placeholder = { Text(text = "••••••••••••") },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.Lock,
-                        contentDescription = "Lock Icon",
+                        contentDescription = "Lock",
                         tint = CodeGuideNavy.copy(alpha = 0.7f),
                         modifier = Modifier.size(18.dp)
                     )
                 },
                 trailingIcon = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                         Icon(
-                            imageVector = Icons.Default.Visibility,
+                            imageVector = if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                             contentDescription = "Toggle visibility",
                             tint = CodeGuideTextSecondary,
                             modifier = Modifier.size(18.dp)
@@ -384,7 +411,7 @@ fun LoginScreen(
                     unfocusedBorderColor = CodeGuideBorder
                 ),
                 singleLine = true,
-                visualTransformation = PasswordVisualTransformation()
+                visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation()
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -397,8 +424,8 @@ fun LoginScreen(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
-                        checked = true,
-                        onCheckedChange = {},
+                        checked = rememberDevice,
+                        onCheckedChange = { rememberDevice = it },
                         colors = CheckboxDefaults.colors(
                             checkedColor = CodeGuideLink,
                             uncheckedColor = CodeGuideBorder
@@ -426,42 +453,53 @@ fun LoginScreen(
 
             // 10. Botón Principal: Entrar al Modo Flujo
             Button(
-                onClick = { onLoginSuccess() },
+                onClick = {
+                    authViewModel.loginUser(email, password, onLoginSuccess)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = CodeGuideNavy)
+                colors = ButtonDefaults.buttonColors(containerColor = CodeGuideNavy),
+                enabled = authState !is AuthState.Loading
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Bolt,
-                        contentDescription = "Bolt",
-                        tint = CodeGuideCyan,
-                        modifier = Modifier.size(20.dp)
+                if (authState is AuthState.Loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(22.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Entrar al Modo Flujo",
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = "Arrow Forward",
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Bolt,
+                            contentDescription = "Bolt",
+                            tint = CodeGuideCyan,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Entrar al Modo Flujo",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Arrow Forward",
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // 11. Botón Passkey / Huella digital
+            // 11. Botón Passkey
             Surface(
-                onClick = { /* TODO: Passkey Auth */ },
+                onClick = { authViewModel.loginUser(email, password, onLoginSuccess) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 color = CodeGuidePasskeyBg,
@@ -478,7 +516,7 @@ fun LoginScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Fingerprint,
-                            contentDescription = "Passkey Icon",
+                            contentDescription = "Passkey",
                             tint = CodeGuideLink,
                             modifier = Modifier.size(22.dp)
                         )
@@ -511,7 +549,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 12. Link para registrarse
+            // 12. Registro
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "¿Aún no tienes cuenta? ",
@@ -529,7 +567,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 13. Footer Informativo de Seguridad y Clusters
+            // Footer
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(50.dp),
@@ -542,7 +580,7 @@ fun LoginScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Security,
-                        contentDescription = "Lock",
+                        contentDescription = "Security",
                         tint = CodeGuideTeal,
                         modifier = Modifier.size(16.dp)
                     )

@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,11 +38,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,6 +62,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tomasreyes.codeguide.ui.components.CodeGuideBottomNavigationBar
 import com.tomasreyes.codeguide.ui.components.CodeGuideLogo
 import com.tomasreyes.codeguide.ui.theme.CodeGuideBackground
 import com.tomasreyes.codeguide.ui.theme.CodeGuideBadgeBg
@@ -67,20 +74,23 @@ import com.tomasreyes.codeguide.ui.theme.CodeGuideNavy
 import com.tomasreyes.codeguide.ui.theme.CodeGuidePasskeyBg
 import com.tomasreyes.codeguide.ui.theme.CodeGuideSurface
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTeal
-import com.tomasreyes.codeguide.ui.theme.CodeGuideTextPrimary
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTextSecondary
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTheme
+import com.tomasreyes.codeguide.ui.viewmodel.CodeGuideViewModel
 
 /**
- * Pantalla: "Métricas" (Métricas de Rendimiento Cognitivo y Bienestar Dev)
- * Maquetación stateless basada en el diseño de CodeGuide.
+ * Pantalla: "Métricas" (Estadísticas Dinámicas con ViewModel)
  */
 @Composable
 fun MetricsScreen(
+    viewModel: CodeGuideViewModel = viewModel(),
     onNavigateToToday: () -> Unit = {},
     onNavigateToProjects: () -> Unit = {},
     onNavigateToFocus: () -> Unit = {}
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+    var selectedPeriod by remember { mutableStateOf("Esta semana") }
+
     Scaffold(
         bottomBar = {
             CodeGuideBottomNavigationBar(
@@ -117,28 +127,28 @@ fun MetricsScreen(
                     .padding(horizontal = 20.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp)
             ) {
-                // 1. Encabezado Superior (Logo + MÉTRICAS + Racha + Avatar)
-                HeaderBarMetrics()
+                HeaderBarMetrics(streakDays = uiState.streakDays)
 
-                // 2. Título & Selector de Periodo (Semana / Sprint / Mes)
-                TitleAndPeriodSelector()
+                TitleAndPeriodSelector(
+                    selectedPeriod = selectedPeriod,
+                    onPeriodSelected = { selectedPeriod = it }
+                )
 
-                // 3. Índice de Claridad Mental (88/100)
-                MentalClarityIndexCard()
+                MentalClarityIndexCard(clarityIndex = uiState.clarityIndex)
 
-                // 4. Ritmo Circadiano & Foco (Gráfico de Onda)
-                CircadianRhythmCard()
+                CircadianRhythmCard(totalFocusHours = (uiState.totalFocusMinutes / 60f))
 
-                // 5. Micro-bloques & Hábitos (Estadísticas)
-                MicroBlocksAndHabitsSection()
+                MicroBlocksAndHabitsSection(
+                    completedCount = uiState.completedDailyTasksCount,
+                    totalCount = uiState.totalDailyTasksCount,
+                    progressPercentage = uiState.dailyProgressPercentage,
+                    streakDays = uiState.streakDays
+                )
 
-                // 6. Copiloto de Salud Mental (Patrón de Fatiga en Tardes)
                 MentalHealthCopilotCard()
 
-                // 7. Carga por Proyecto (Breakdown de esfuerzo mental)
                 ProjectLoadCard()
 
-                // 8. Cita: Calidad sobre volumen
                 QualityOverVolumeCard()
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -147,9 +157,8 @@ fun MetricsScreen(
     }
 }
 
-// 1. Encabezado Superior
 @Composable
-private fun HeaderBarMetrics() {
+private fun HeaderBarMetrics(streakDays: Int) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -192,7 +201,7 @@ private fun HeaderBarMetrics() {
                     Text(text = "🔥", fontSize = 13.sp)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "5d",
+                        text = "${streakDays}d",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = CodeGuideNavy
@@ -228,9 +237,11 @@ private fun HeaderBarMetrics() {
     }
 }
 
-// 2. Título Principal & Filtro de Periodo
 @Composable
-private fun TitleAndPeriodSelector() {
+private fun TitleAndPeriodSelector(
+    selectedPeriod: String,
+    onPeriodSelected: (String) -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -269,73 +280,38 @@ private fun TitleAndPeriodSelector() {
             }
         }
 
-        // Fila de Filtros: Esta semana / Sprint actual / Mes (Jun)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Tab 1: Esta semana (Seleccionado)
-            Surface(
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(10.dp),
-                color = CodeGuideSurface,
-                border = BorderStroke(1.5.dp, CodeGuideBorder)
-            ) {
-                Box(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    contentAlignment = Alignment.Center
+            listOf("Esta semana", "Sprint actual", "Mes (Jun)").forEach { period ->
+                val isSelected = period == selectedPeriod
+                Surface(
+                    onClick = { onPeriodSelected(period) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(10.dp),
+                    color = if (isSelected) CodeGuideSurface else CodeGuidePasskeyBg,
+                    border = if (isSelected) BorderStroke(1.5.dp, CodeGuideBorder) else null
                 ) {
-                    Text(
-                        text = "Esta semana",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = CodeGuideNavy
-                    )
-                }
-            }
-
-            // Tab 2: Sprint actual
-            Surface(
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(10.dp),
-                color = CodeGuidePasskeyBg
-            ) {
-                Box(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Sprint actual",
-                        fontSize = 12.sp,
-                        color = CodeGuideTextSecondary
-                    )
-                }
-            }
-
-            // Tab 3: Mes (Jun)
-            Surface(
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(10.dp),
-                color = CodeGuidePasskeyBg
-            ) {
-                Box(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Mes (Jun)",
-                        fontSize = 12.sp,
-                        color = CodeGuideTextSecondary
-                    )
+                    Box(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = period,
+                            fontSize = 12.sp,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isSelected) CodeGuideNavy else CodeGuideTextSecondary
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-// 3. Tarjeta: Índice de Claridad Mental
 @Composable
-private fun MentalClarityIndexCard() {
+private fun MentalClarityIndexCard(clarityIndex: Int) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -343,7 +319,6 @@ private fun MentalClarityIndexCard() {
         border = BorderStroke(1.dp, CodeGuideBorder)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
-            // Header Row: Label + Pill Risk
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -374,7 +349,6 @@ private fun MentalClarityIndexCard() {
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Number display: 88 /100 + comparison
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -382,7 +356,7 @@ private fun MentalClarityIndexCard() {
             ) {
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(
-                        text = "88",
+                        text = "$clarityIndex",
                         fontSize = 34.sp,
                         fontWeight = FontWeight.Bold,
                         color = CodeGuideNavy
@@ -424,7 +398,6 @@ private fun MentalClarityIndexCard() {
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Subtarjeta: Sobrecarga cognitiva mitigada 94%
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -464,9 +437,8 @@ private fun MentalClarityIndexCard() {
     }
 }
 
-// 4. Tarjeta: Ritmo Circadiano & Foco (Gráfico de Onda)
 @Composable
-private fun CircadianRhythmCard() {
+private fun CircadianRhythmCard(totalFocusHours: Float) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -474,7 +446,6 @@ private fun CircadianRhythmCard() {
         border = BorderStroke(1.dp, CodeGuideBorder)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
-            // Header Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -511,7 +482,6 @@ private fun CircadianRhythmCard() {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Subtarjeta: Horario Pico Identificado
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -558,7 +528,6 @@ private fun CircadianRhythmCard() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Gráfico de Onda Canvas (Wave Chart)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -568,7 +537,6 @@ private fun CircadianRhythmCard() {
                     val width = size.width
                     val height = size.height
 
-                    // Zona Flow sombreada (Peak Window)
                     val zonePath = Path().apply {
                         moveTo(width * 0.22f, height)
                         lineTo(width * 0.22f, height * 0.1f)
@@ -581,7 +549,6 @@ private fun CircadianRhythmCard() {
                         color = Color(0xFFEDF5FD)
                     )
 
-                    // Curva de onda del ritmo circadiano
                     val wavePath = Path().apply {
                         moveTo(0f, height * 0.75f)
                         cubicTo(
@@ -607,21 +574,13 @@ private fun CircadianRhythmCard() {
                         style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
                     )
 
-                    // Punto de pico (11:00 AM)
                     drawCircle(
                         color = CodeGuideTeal,
                         radius = 5.dp.toPx(),
                         center = Offset(width * 0.32f, height * 0.12f)
                     )
-                    // Punto dip (14:30)
-                    drawCircle(
-                        color = Color.Gray,
-                        radius = 4.dp.toPx(),
-                        center = androidx.compose.ui.geometry.Offset(width * 0.60f, height * 0.75f)
-                    )
                 }
 
-                // Etiqueta flotante "ZONA FLOW"
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopStart)
@@ -642,7 +601,6 @@ private fun CircadianRhythmCard() {
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Eje X: Horarios
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -656,7 +614,6 @@ private fun CircadianRhythmCard() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 3 Tarjetas de Resumen
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -664,7 +621,7 @@ private fun CircadianRhythmCard() {
                 CircadianSummaryChip(
                     modifier = Modifier.weight(1f),
                     title = "Deep Work",
-                    value = "14.5 h",
+                    value = String.format("%.1f h", totalFocusHours),
                     tag = "Alto foco",
                     isTeal = false
                 )
@@ -731,9 +688,13 @@ private fun CircadianSummaryChip(
     }
 }
 
-// 5. Seccion: Micro-bloques & Hábitos
 @Composable
-private fun MicroBlocksAndHabitsSection() {
+private fun MicroBlocksAndHabitsSection(
+    completedCount: Int,
+    totalCount: Int,
+    progressPercentage: Int,
+    streakDays: Int
+) {
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -759,17 +720,15 @@ private fun MicroBlocksAndHabitsSection() {
         Spacer(modifier = Modifier.height(14.dp))
 
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            // Métrica 1: Micro-tareas logradas
             HabitMetricItem(
                 icon = Icons.Default.CheckCircle,
                 title = "Micro-tareas logradas",
-                score = "89%",
-                subtitle = "32 de 36 completadas sin overtime",
+                score = "$progressPercentage%",
+                subtitle = "$completedCount de $totalCount completadas hoy",
                 tag = "ÓPTIMO",
                 isTealTag = true
             )
 
-            // Métrica 2: Tiempo por bloque de código
             HabitMetricItem(
                 icon = Icons.Default.Timer,
                 title = "Tiempo por bloque de código",
@@ -779,11 +738,10 @@ private fun MicroBlocksAndHabitsSection() {
                 isTealTag = false
             )
 
-            // Métrica 3: Racha en ritmo óptimo
             HabitMetricItem(
                 icon = Icons.Default.LocalFireDepartment,
                 title = "Racha en ritmo óptimo",
-                score = "5 d",
+                score = "$streakDays d",
                 subtitle = "Días sin picos de fatiga aguda",
                 tag = "RÉCORD PERSONAL",
                 isTealTag = false
@@ -874,7 +832,6 @@ private fun HabitMetricItem(
     }
 }
 
-// 6. Copiloto de Salud Mental (Dark Navy Card)
 @Composable
 private fun MentalHealthCopilotCard() {
     Surface(
@@ -968,7 +925,6 @@ private fun MentalHealthCopilotCard() {
     }
 }
 
-// 7. Carga por Proyecto
 @Composable
 private fun ProjectLoadCard() {
     Surface(
@@ -1006,7 +962,6 @@ private fun ProjectLoadCard() {
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Proyecto 1: E-Commerce Microservices
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1040,7 +995,6 @@ private fun ProjectLoadCard() {
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Proyecto 2: App Móvil Flutter
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1093,7 +1047,6 @@ private fun ProjectLoadCard() {
     }
 }
 
-// 8. Cita: Calidad sobre volumen
 @Composable
 private fun QualityOverVolumeCard() {
     Surface(
