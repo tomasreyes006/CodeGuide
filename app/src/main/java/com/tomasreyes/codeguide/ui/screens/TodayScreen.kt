@@ -89,7 +89,8 @@ fun TodayScreen(
     viewModel: CodeGuideViewModel = viewModel(),
     onNavigateToProjects: () -> Unit = {},
     onNavigateToFocus: () -> Unit = {},
-    onNavigateToMetrics: () -> Unit = {}
+    onNavigateToMetrics: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showAddTaskDialog by remember { mutableStateOf(false) }
@@ -131,7 +132,7 @@ fun TodayScreen(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 // 1. Encabezado
-                HeaderBar(streakDays = uiState.streakDays)
+                HeaderBar(streakDays = uiState.streakDays, onProfileClick = onNavigateToProfile)
 
                 // 2. Calibración Mental Funcional
                 MentalCalibrationCard(
@@ -176,7 +177,7 @@ fun TodayScreen(
 }
 
 @Composable
-private fun HeaderBar(streakDays: Int) {
+private fun HeaderBar(streakDays: Int, onProfileClick: () -> Unit = {}) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -227,7 +228,10 @@ private fun HeaderBar(streakDays: Int) {
                 }
             }
 
-            Box(contentAlignment = Alignment.BottomEnd) {
+            Box(
+                contentAlignment = Alignment.BottomEnd,
+                modifier = Modifier.clickable { onProfileClick() }
+            ) {
                 Surface(
                     shape = CircleShape,
                     color = CodeGuideNavy,
@@ -850,6 +854,10 @@ private fun AddTaskDialog(
                     value = title,
                     onValueChange = { title = it },
                     label = { Text("Título de la tarea") },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = CodeGuideTextPrimary,
+                        unfocusedTextColor = CodeGuideTextPrimary
+                    ),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -857,12 +865,20 @@ private fun AddTaskDialog(
                     value = description,
                     onValueChange = { description = it },
                     label = { Text("Descripción (opcional)") },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = CodeGuideTextPrimary,
+                        unfocusedTextColor = CodeGuideTextPrimary
+                    ),
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = duration,
                     onValueChange = { duration = it },
                     label = { Text("Duración estimada (minutos)") },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = CodeGuideTextPrimary,
+                        unfocusedTextColor = CodeGuideTextPrimary
+                    ),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -870,6 +886,10 @@ private fun AddTaskDialog(
                     value = tag,
                     onValueChange = { tag = it },
                     label = { Text("Etiquetas (separadas por coma)") },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = CodeGuideTextPrimary,
+                        unfocusedTextColor = CodeGuideTextPrimary
+                    ),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -893,10 +913,4 @@ private fun AddTaskDialog(
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun TodayScreenPreview() {
-    CodeGuideTheme {
-        TodayScreen()
-    }
-}
+

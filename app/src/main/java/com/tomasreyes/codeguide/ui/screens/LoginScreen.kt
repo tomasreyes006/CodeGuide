@@ -347,6 +347,8 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = CodeGuideTextPrimary,
+                    unfocusedTextColor = CodeGuideTextPrimary,
                     focusedContainerColor = CodeGuideSurface,
                     unfocusedContainerColor = CodeGuideSurface,
                     focusedBorderColor = CodeGuideTeal,
@@ -405,6 +407,8 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = CodeGuideTextPrimary,
+                    unfocusedTextColor = CodeGuideTextPrimary,
                     focusedContainerColor = CodeGuideSurface,
                     unfocusedContainerColor = CodeGuideSurface,
                     focusedBorderColor = CodeGuideTeal,
@@ -615,10 +619,4 @@ fun LoginScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    CodeGuideTheme {
-        LoginScreen()
-    }
-}
+

@@ -25,7 +25,7 @@ private val LightColorScheme = lightColorScheme(
     onBackground = CodeGuideTextPrimary,
     surface = CodeGuideSurface,
     onSurface = CodeGuideTextPrimary,
-    surfaceVariant = CodeGuideBackground,
+    surfaceVariant = CodeGuidePasskeyBg,
     onSurfaceVariant = CodeGuideTextSecondary,
     outline = CodeGuideBorder
 )
@@ -33,11 +33,20 @@ private val LightColorScheme = lightColorScheme(
 private val DarkColorScheme = darkColorScheme(
     primary = CodeGuideTealBright,
     onPrimary = CodeGuideNavy,
+    primaryContainer = CodeGuideDarkPasskeyBg,
+    onPrimaryContainer = CodeGuideDarkTextPrimary,
     secondary = CodeGuideCyan,
-    background = CodeGuideNavy,
-    onBackground = CodeGuideSurface,
-    surface = CodeGuideNavyLight,
-    onSurface = CodeGuideSurface
+    onSecondary = CodeGuideNavy,
+    secondaryContainer = CodeGuideDarkBadgeBg,
+    onSecondaryContainer = CodeGuideTealBright,
+    tertiary = CodeGuideCyan,
+    background = CodeGuideDarkBackground,
+    onBackground = CodeGuideDarkTextPrimary,
+    surface = CodeGuideDarkSurface,
+    onSurface = CodeGuideDarkTextPrimary,
+    surfaceVariant = CodeGuideDarkPasskeyBg,
+    onSurfaceVariant = CodeGuideDarkTextSecondary,
+    outline = CodeGuideDarkBorder
 )
 
 @Composable

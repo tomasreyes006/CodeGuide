@@ -107,7 +107,10 @@ data class CodeGuideUiState(
     val completedBlocksCount: Int = 14,
     val totalFocusMinutes: Int = 360,
     val clarityIndex: Int = 88,
-    val streakDays: Int = 5
+    val streakDays: Int = 5,
+
+    // State 5: Configuración / Modo Oscuro
+    val isDarkMode: Boolean = false
 ) {
     val completedDailyTasksCount: Int
         get() = dailyTasks.count { it.isCompleted }
@@ -186,6 +189,15 @@ class CodeGuideViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(
             projectsList = _uiState.value.projectsList + newProject
         )
+    }
+
+    fun deleteProject(projectId: String) {
+        val updatedProjects = _uiState.value.projectsList.filter { it.id != projectId }
+        _uiState.value = _uiState.value.copy(projectsList = updatedProjects)
+    }
+
+    fun toggleDarkMode() {
+        _uiState.value = _uiState.value.copy(isDarkMode = !_uiState.value.isDarkMode)
     }
 
     // --- ACCIONES DE ENFOQUE / TIMER ---

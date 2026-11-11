@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -84,7 +85,8 @@ fun FocusScreen(
     viewModel: CodeGuideViewModel = viewModel(),
     onNavigateToToday: () -> Unit = {},
     onNavigateToProjects: () -> Unit = {},
-    onNavigateToMetrics: () -> Unit = {}
+    onNavigateToMetrics: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -125,7 +127,7 @@ fun FocusScreen(
                 verticalArrangement = Arrangement.spacedBy(18.dp)
             ) {
                 // 1. Header
-                HeaderBarFocus(streakDays = uiState.streakDays)
+                HeaderBarFocus(streakDays = uiState.streakDays, onProfileClick = onNavigateToProfile)
 
                 // 2. Sesión
                 FlowSessionHeaderCard()
@@ -172,7 +174,7 @@ fun FocusScreen(
 }
 
 @Composable
-private fun HeaderBarFocus(streakDays: Int) {
+private fun HeaderBarFocus(streakDays: Int, onProfileClick: () -> Unit = {}) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -223,7 +225,10 @@ private fun HeaderBarFocus(streakDays: Int) {
                 }
             }
 
-            Box(contentAlignment = Alignment.BottomEnd) {
+            Box(
+                contentAlignment = Alignment.BottomEnd,
+                modifier = Modifier.clickable { onProfileClick() }
+            ) {
                 Surface(
                     shape = CircleShape,
                     color = CodeGuideNavy,
@@ -901,10 +906,4 @@ private fun SustainableRhythmCard() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun FocusScreenPreview() {
-    CodeGuideTheme {
-        FocusScreen()
-    }
-}
+

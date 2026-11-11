@@ -23,21 +23,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AddCircleOutline
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Dns
-import androidx.compose.material.icons.filled.Eco
-import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.RocketLaunch
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Smartphone
-import androidx.compose.material.icons.filled.Terminal
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -65,7 +56,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -74,7 +64,6 @@ import com.tomasreyes.codeguide.data.model.ProjectStatus
 import com.tomasreyes.codeguide.ui.components.CodeGuideBottomNavigationBar
 import com.tomasreyes.codeguide.ui.components.CodeGuideLogo
 import com.tomasreyes.codeguide.ui.theme.CodeGuideBackground
-import com.tomasreyes.codeguide.ui.theme.CodeGuideBadgeBg
 import com.tomasreyes.codeguide.ui.theme.CodeGuideBorder
 import com.tomasreyes.codeguide.ui.theme.CodeGuideLink
 import com.tomasreyes.codeguide.ui.theme.CodeGuideNavy
@@ -83,11 +72,10 @@ import com.tomasreyes.codeguide.ui.theme.CodeGuideSurface
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTeal
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTextPrimary
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTextSecondary
-import com.tomasreyes.codeguide.ui.theme.CodeGuideTheme
 import com.tomasreyes.codeguide.ui.viewmodel.CodeGuideViewModel
 
 /**
- * Pantalla: "Proyectos" (Totalmente Funcional con ViewModel)
+ * Pantalla: "Proyectos" (CRUD Funcional con ViewModel)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,10 +83,12 @@ fun ProjectsScreen(
     viewModel: CodeGuideViewModel = viewModel(),
     onNavigateToToday: () -> Unit = {},
     onNavigateToFocus: () -> Unit = {},
-    onNavigateToMetrics: () -> Unit = {}
+    onNavigateToMetrics: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showCreateModal by remember { mutableStateOf(false) }
+    var projectToDelete by remember { mutableStateOf<ProjectItem?>(null) }
 
     val filteredProjects = uiState.projectsList.filter { project ->
         val matchesFilter = project.status == uiState.projectFilter
@@ -145,7 +135,7 @@ fun ProjectsScreen(
                 verticalArrangement = Arrangement.spacedBy(18.dp)
             ) {
                 // 1. Header
-                HeaderBarProjects()
+                HeaderBarProjects(onProfileClick = onNavigateToProfile)
 
                 // 2. Metría
                 CognitiveLoadMetricCard()
@@ -186,7 +176,11 @@ fun ProjectsScreen(
                     }
                 } else {
                     filteredProjects.forEach { project ->
-                        GenericProjectCard(project = project, onStartTask = onNavigateToFocus)
+                        GenericProjectCard(
+                            project = project,
+                            onStartTask = onNavigateToFocus,
+                            onDelete = { projectToDelete = project }
+                        )
                     }
                 }
 
@@ -205,12 +199,48 @@ fun ProjectsScreen(
                     }
                 )
             }
+
+            // Diálogo de Confirmación de Borrado CRUD
+            projectToDelete?.let { targetProject ->
+                AlertDialog(
+                    onDismissRequest = { projectToDelete = null },
+                    title = {
+                        Text(text = "Eliminar Proyecto", fontWeight = FontWeight.Bold, color = CodeGuideNavy)
+                    },
+                    text = {
+                        Text(
+                            text = "¿Estás seguro de que deseas eliminar el proyecto '${targetProject.title}'? Esta acción no se puede deshacer.",
+                            fontSize = 13.sp,
+                            color = CodeGuideTextSecondary
+                        )
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                viewModel.deleteProject(targetProject.id)
+                                projectToDelete = null
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE11D48))
+                        ) {
+                            Text("Eliminar", color = Color.White)
+                        }
+                    },
+                    dismissButton = {
+                        Button(
+                            onClick = { projectToDelete = null },
+                            colors = ButtonDefaults.buttonColors(containerColor = CodeGuideBorder)
+                        ) {
+                            Text("Cancelar", color = CodeGuideNavy)
+                        }
+                    }
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun HeaderBarProjects() {
+private fun HeaderBarProjects(onProfileClick: () -> Unit = {}) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -261,7 +291,10 @@ private fun HeaderBarProjects() {
                 }
             }
 
-            Box(contentAlignment = Alignment.BottomEnd) {
+            Box(
+                contentAlignment = Alignment.BottomEnd,
+                modifier = Modifier.clickable { onProfileClick() }
+            ) {
                 Surface(
                     shape = CircleShape,
                     color = CodeGuideNavy,
@@ -423,6 +456,8 @@ private fun SearchAndFilterSection(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = CodeGuideTextPrimary,
+                unfocusedTextColor = CodeGuideTextPrimary,
                 focusedContainerColor = CodeGuideSurface,
                 unfocusedContainerColor = CodeGuideSurface,
                 focusedBorderColor = CodeGuideTeal,
@@ -436,7 +471,7 @@ private fun SearchAndFilterSection(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ProjectStatus.values().forEach { status ->
+            ProjectStatus.entries.forEach { status ->
                 val isSelected = status == selectedStatus
                 Box(
                     modifier = Modifier
@@ -465,7 +500,8 @@ private fun SearchAndFilterSection(
 @Composable
 private fun GenericProjectCard(
     project: ProjectItem,
-    onStartTask: () -> Unit
+    onStartTask: () -> Unit,
+    onDelete: () -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -479,7 +515,10 @@ private fun GenericProjectCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Box(
                         modifier = Modifier
                             .size(40.dp)
@@ -513,18 +552,29 @@ private fun GenericProjectCard(
                     }
                 }
 
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50.dp))
-                        .background(CodeGuidePasskeyBg)
-                        .padding(horizontal = 10.dp, vertical = 5.dp)
-                ) {
-                    Text(
-                        text = project.phaseOrBadge,
-                        fontSize = 11.sp,
-                        fontFamily = FontFamily.Monospace,
-                        color = CodeGuideLink
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50.dp))
+                            .background(CodeGuidePasskeyBg)
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                    ) {
+                        Text(
+                            text = project.phaseOrBadge,
+                            fontSize = 11.sp,
+                            fontFamily = FontFamily.Monospace,
+                            color = CodeGuideLink
+                        )
+                    }
+
+                    IconButton(onClick = onDelete) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Borrar Proyecto",
+                            tint = Color(0xFFE11D48),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
 
@@ -763,6 +813,8 @@ private fun CreateProjectBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = CodeGuideTextPrimary,
+                    unfocusedTextColor = CodeGuideTextPrimary,
                     focusedBorderColor = CodeGuideTeal,
                     unfocusedBorderColor = CodeGuideBorder
                 ),
@@ -782,6 +834,8 @@ private fun CreateProjectBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = CodeGuideTextPrimary,
+                    unfocusedTextColor = CodeGuideTextPrimary,
                     focusedBorderColor = CodeGuideTeal,
                     unfocusedBorderColor = CodeGuideBorder
                 ),
@@ -801,6 +855,8 @@ private fun CreateProjectBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = CodeGuideTextPrimary,
+                    unfocusedTextColor = CodeGuideTextPrimary,
                     focusedBorderColor = CodeGuideTeal,
                     unfocusedBorderColor = CodeGuideBorder
                 ),
@@ -840,13 +896,5 @@ private fun CreateProjectBottomSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ProjectsScreenPreview() {
-    CodeGuideTheme {
-        ProjectsScreen()
     }
 }

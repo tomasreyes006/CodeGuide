@@ -86,7 +86,8 @@ fun MetricsScreen(
     viewModel: CodeGuideViewModel = viewModel(),
     onNavigateToToday: () -> Unit = {},
     onNavigateToProjects: () -> Unit = {},
-    onNavigateToFocus: () -> Unit = {}
+    onNavigateToFocus: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var selectedPeriod by remember { mutableStateOf("Esta semana") }
@@ -127,7 +128,7 @@ fun MetricsScreen(
                     .padding(horizontal = 20.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp)
             ) {
-                HeaderBarMetrics(streakDays = uiState.streakDays)
+                HeaderBarMetrics(streakDays = uiState.streakDays, onProfileClick = onNavigateToProfile)
 
                 TitleAndPeriodSelector(
                     selectedPeriod = selectedPeriod,
@@ -158,7 +159,7 @@ fun MetricsScreen(
 }
 
 @Composable
-private fun HeaderBarMetrics(streakDays: Int) {
+private fun HeaderBarMetrics(streakDays: Int, onProfileClick: () -> Unit = {}) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -209,7 +210,10 @@ private fun HeaderBarMetrics(streakDays: Int) {
                 }
             }
 
-            Box(contentAlignment = Alignment.BottomEnd) {
+            Box(
+                contentAlignment = Alignment.BottomEnd,
+                modifier = Modifier.clickable { onProfileClick() }
+            ) {
                 Surface(
                     shape = CircleShape,
                     color = CodeGuideNavy,
@@ -1095,10 +1099,4 @@ private fun QualityOverVolumeCard() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun MetricsScreenPreview() {
-    CodeGuideTheme {
-        MetricsScreen()
-    }
-}
+

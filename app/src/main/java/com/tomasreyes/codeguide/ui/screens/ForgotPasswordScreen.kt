@@ -200,6 +200,8 @@ fun ForgotPasswordScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = CodeGuideTextPrimary,
+                            unfocusedTextColor = CodeGuideTextPrimary,
                             focusedBorderColor = CodeGuideTeal,
                             unfocusedBorderColor = CodeGuideBorder
                         ),
@@ -298,10 +300,4 @@ fun ForgotPasswordScreen(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ForgotPasswordScreenPreview() {
-    CodeGuideTheme {
-        ForgotPasswordScreen()
-    }
-}
+
