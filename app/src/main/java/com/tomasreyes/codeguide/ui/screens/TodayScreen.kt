@@ -73,7 +73,7 @@ import com.tomasreyes.codeguide.ui.theme.CodeGuideTeal
 import com.tomasreyes.codeguide.ui.viewmodel.CodeGuideViewModel
 
 /**
- * Pantalla Principal: "Hoy" (Avatar Sonic + Alineación de Completada)
+ * Pantalla Principal: "Hoy"
  */
 @Composable
 fun TodayScreen(

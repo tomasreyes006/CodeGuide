@@ -80,7 +80,7 @@ fun LoginScreen(
     onNavigateToForgotPassword: () -> Unit = {},
     onLoginSuccess: () -> Unit = {}
 ) {
-    var email by remember { mutableStateOf("dev@codeguide.io") }
+    var email by remember { mutableStateOf("tomas.reyes@codeguide.io") }
     var password by remember { mutableStateOf("123456789012") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     var rememberDevice by remember { mutableStateOf(true) }
@@ -151,6 +151,45 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Botón Google Sign-In (Firebase Auth)
+            OutlinedButton(
+                onClick = {
+                    authViewModel.signInWithGoogle(onSuccess = onLoginSuccess)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.surface),
+                border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(text = "🌐", fontSize = 16.sp)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "Continuar con Google",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Text(
+                        text = "firebase:google",
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        color = CodeGuideLink
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Botón GitHub
             Button(
                 onClick = {
                     authViewModel.loginUser(email, password, onLoginSuccess)

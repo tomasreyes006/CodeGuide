@@ -79,7 +79,7 @@ import com.tomasreyes.codeguide.ui.theme.CodeGuideTeal
 import com.tomasreyes.codeguide.ui.viewmodel.CodeGuideViewModel
 
 /**
- * Pantalla: "Proyectos" (Detalle de Proyecto, Avatar Sonic, CRUD)
+ * Pantalla: "Proyectos" (Detalle de Proyecto, CRUD)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
