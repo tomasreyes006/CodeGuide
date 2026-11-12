@@ -2,6 +2,7 @@ package com.tomasreyes.codeguide.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -38,6 +39,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -51,35 +53,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tomasreyes.codeguide.R
 import com.tomasreyes.codeguide.ui.components.CodeGuideBottomNavigationBar
 import com.tomasreyes.codeguide.ui.components.CodeGuideLogo
-import com.tomasreyes.codeguide.ui.theme.CodeGuideBackground
-import com.tomasreyes.codeguide.ui.theme.CodeGuideBadgeBg
-import com.tomasreyes.codeguide.ui.theme.CodeGuideBorder
 import com.tomasreyes.codeguide.ui.theme.CodeGuideCyan
 import com.tomasreyes.codeguide.ui.theme.CodeGuideLink
-import com.tomasreyes.codeguide.ui.theme.CodeGuideNavy
-import com.tomasreyes.codeguide.ui.theme.CodeGuidePasskeyBg
-import com.tomasreyes.codeguide.ui.theme.CodeGuideSurface
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTeal
-import com.tomasreyes.codeguide.ui.theme.CodeGuideTextSecondary
-import com.tomasreyes.codeguide.ui.theme.CodeGuideTheme
 import com.tomasreyes.codeguide.ui.viewmodel.CodeGuideViewModel
+import java.util.Locale
 
 /**
- * Pantalla: "Métricas" (Estadísticas Dinámicas con ViewModel)
+ * Pantalla: "Métricas" (Diseño Adaptativo y Compatibilidad Oscura Completa)
  */
 @Composable
 fun MetricsScreen(
@@ -105,21 +101,13 @@ fun MetricsScreen(
                 }
             )
         },
-        containerColor = CodeGuideBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            CodeGuideBackground,
-                            Color(0xFFEBF5FB),
-                            CodeGuideBackground
-                        )
-                    )
-                )
+                .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
                 modifier = Modifier
@@ -173,14 +161,14 @@ private fun HeaderBarMetrics(streakDays: Int, onProfileClick: () -> Unit = {}) {
                     text = "CodeGuide",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = CodeGuideNavy
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "MÉTRICAS",
                     fontSize = 10.sp,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
-                    color = CodeGuideTextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     letterSpacing = 1.sp
                 )
             }
@@ -192,8 +180,8 @@ private fun HeaderBarMetrics(streakDays: Int, onProfileClick: () -> Unit = {}) {
         ) {
             Surface(
                 shape = RoundedCornerShape(50.dp),
-                color = CodeGuidePasskeyBg,
-                border = BorderStroke(1.dp, CodeGuideBorder)
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
@@ -205,7 +193,7 @@ private fun HeaderBarMetrics(streakDays: Int, onProfileClick: () -> Unit = {}) {
                         text = "${streakDays}d",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = CodeGuideNavy
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -216,16 +204,16 @@ private fun HeaderBarMetrics(streakDays: Int, onProfileClick: () -> Unit = {}) {
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = CodeGuideNavy,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(36.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
-                            text = "img",
+                            text = "TR",
                             fontSize = 11.sp,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
@@ -234,7 +222,7 @@ private fun HeaderBarMetrics(streakDays: Int, onProfileClick: () -> Unit = {}) {
                         .size(10.dp)
                         .clip(CircleShape)
                         .background(CodeGuideTeal)
-                        .border(1.5.dp, Color.White, CircleShape)
+                        .border(1.5.dp, MaterialTheme.colorScheme.surface, CircleShape)
                 )
             }
         }
@@ -257,27 +245,27 @@ private fun TitleAndPeriodSelector(
                     text = "Métricas & Bienestar",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = CodeGuideNavy
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "Rendimiento cognitivo y prevención de agotamiento",
                     fontSize = 12.sp,
-                    color = CodeGuideTextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = CodeGuidePasskeyBg,
-                border = BorderStroke(1.dp, CodeGuideBorder),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                 modifier = Modifier.size(38.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Default.Share,
                         contentDescription = "Share",
-                        tint = CodeGuideNavy,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -294,8 +282,8 @@ private fun TitleAndPeriodSelector(
                     onClick = { onPeriodSelected(period) },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(10.dp),
-                    color = if (isSelected) CodeGuideSurface else CodeGuidePasskeyBg,
-                    border = if (isSelected) BorderStroke(1.5.dp, CodeGuideBorder) else null
+                    color = if (isSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant,
+                    border = if (isSelected) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null
                 ) {
                     Box(
                         modifier = Modifier.padding(vertical = 8.dp),
@@ -305,7 +293,7 @@ private fun TitleAndPeriodSelector(
                             text = period,
                             fontSize = 12.sp,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                            color = if (isSelected) CodeGuideNavy else CodeGuideTextSecondary
+                            color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -319,8 +307,8 @@ private fun MentalClarityIndexCard(clarityIndex: Int) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = CodeGuideSurface,
-        border = BorderStroke(1.dp, CodeGuideBorder)
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Row(
@@ -333,13 +321,13 @@ private fun MentalClarityIndexCard(clarityIndex: Int) {
                     fontSize = 10.sp,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
-                    color = CodeGuideTextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(50.dp))
-                        .background(CodeGuidePasskeyBg)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
@@ -363,13 +351,13 @@ private fun MentalClarityIndexCard(clarityIndex: Int) {
                         text = "$clarityIndex",
                         fontSize = 34.sp,
                         fontWeight = FontWeight.Bold,
-                        color = CodeGuideNavy
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = " /100",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = CodeGuideTextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
                 }
@@ -378,7 +366,7 @@ private fun MentalClarityIndexCard(clarityIndex: Int) {
                     text = "+4% vs. sprint anterior",
                     fontSize = 12.sp,
                     fontFamily = FontFamily.Monospace,
-                    color = CodeGuideTextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -405,7 +393,7 @@ private fun MentalClarityIndexCard(clarityIndex: Int) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                color = CodeGuidePasskeyBg
+                color = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -424,7 +412,7 @@ private fun MentalClarityIndexCard(clarityIndex: Int) {
                             text = "Sobrecarga cognitiva mitigada",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium,
-                            color = CodeGuideNavy
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
 
@@ -433,7 +421,7 @@ private fun MentalClarityIndexCard(clarityIndex: Int) {
                         fontSize = 13.sp,
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
-                        color = CodeGuideNavy
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -446,8 +434,8 @@ private fun CircadianRhythmCard(totalFocusHours: Float) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = CodeGuideSurface,
-        border = BorderStroke(1.dp, CodeGuideBorder)
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Row(
@@ -459,14 +447,14 @@ private fun CircadianRhythmCard(totalFocusHours: Float) {
                     text = "Ritmo Circadiano & Foco",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = CodeGuideNavy
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Box(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(CircleShape)
-                        .background(CodeGuidePasskeyBg),
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -481,7 +469,7 @@ private fun CircadianRhythmCard(totalFocusHours: Float) {
             Text(
                 text = "Ventana óptima para escribir arquitectura y lógica pura",
                 fontSize = 12.sp,
-                color = CodeGuideTextSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -489,7 +477,7 @@ private fun CircadianRhythmCard(totalFocusHours: Float) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                color = CodeGuidePasskeyBg
+                color = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
@@ -508,7 +496,7 @@ private fun CircadianRhythmCard(totalFocusHours: Float) {
                             text = "Horario Pico\nIdentificado",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = CodeGuideNavy,
+                            color = MaterialTheme.colorScheme.onSurface,
                             lineHeight = 14.sp
                         )
                     }
@@ -516,7 +504,7 @@ private fun CircadianRhythmCard(totalFocusHours: Float) {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
-                            .background(Color.White)
+                            .background(MaterialTheme.colorScheme.surface)
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Text(
@@ -524,7 +512,7 @@ private fun CircadianRhythmCard(totalFocusHours: Float) {
                             fontSize = 11.sp,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
-                            color = CodeGuideNavy
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -537,6 +525,7 @@ private fun CircadianRhythmCard(totalFocusHours: Float) {
                     .fillMaxWidth()
                     .height(120.dp)
             ) {
+                val flowZoneColor = MaterialTheme.colorScheme.surfaceVariant
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val width = size.width
                     val height = size.height
@@ -550,7 +539,7 @@ private fun CircadianRhythmCard(totalFocusHours: Float) {
                     }
                     drawPath(
                         path = zonePath,
-                        color = Color(0xFFEDF5FD)
+                        color = flowZoneColor
                     )
 
                     val wavePath = Path().apply {
@@ -590,7 +579,7 @@ private fun CircadianRhythmCard(totalFocusHours: Float) {
                         .align(Alignment.TopStart)
                         .padding(start = 70.dp, top = 4.dp)
                         .clip(RoundedCornerShape(50.dp))
-                        .background(CodeGuidePasskeyBg)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .padding(horizontal = 8.dp, vertical = 2.dp)
                 ) {
                     Text(
@@ -609,11 +598,11 @@ private fun CircadianRhythmCard(totalFocusHours: Float) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "08:00", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = CodeGuideTextSecondary)
-                Text(text = "11:00 (Pico)", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = CodeGuideNavy)
-                Text(text = "14:30 (Dip)", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = CodeGuideTextSecondary)
-                Text(text = "17:00", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = CodeGuideTextSecondary)
-                Text(text = "20:00", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = CodeGuideTextSecondary)
+                Text(text = "08:00", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = "11:00 (Pico)", fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+                Text(text = "14:30 (Dip)", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = "17:00", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = "20:00", fontSize = 10.sp, fontFamily = FontFamily.Monospace, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -625,7 +614,7 @@ private fun CircadianRhythmCard(totalFocusHours: Float) {
                 CircadianSummaryChip(
                     modifier = Modifier.weight(1f),
                     title = "Deep Work",
-                    value = String.format("%.1f h", totalFocusHours),
+                    value = String.format(Locale.US, "%.1f h", totalFocusHours),
                     tag = "Alto foco",
                     isTeal = false
                 )
@@ -661,7 +650,7 @@ private fun CircadianSummaryChip(
     Surface(
         modifier = modifier.height(78.dp),
         shape = RoundedCornerShape(12.dp),
-        color = CodeGuidePasskeyBg
+        color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Column(
             modifier = Modifier
@@ -670,14 +659,14 @@ private fun CircadianSummaryChip(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
-                Text(text = title, fontSize = 10.sp, color = CodeGuideTextSecondary)
-                Text(text = value, fontSize = 13.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = CodeGuideNavy)
+                Text(text = title, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = value, fontSize = 13.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
             }
 
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(4.dp))
-                    .background(if (isTeal) CodeGuideBadgeBg else Color.White)
+                    .background(if (isTeal) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface)
                     .padding(horizontal = 6.dp, vertical = 2.dp)
             ) {
                 Text(
@@ -709,7 +698,7 @@ private fun MicroBlocksAndHabitsSection(
                 text = "Micro-bloques & Hábitos",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = CodeGuideNavy
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Text(
@@ -766,8 +755,8 @@ private fun HabitMetricItem(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        color = CodeGuideSurface,
-        border = BorderStroke(1.dp, CodeGuideBorder)
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Row(
             modifier = Modifier.padding(14.dp),
@@ -777,13 +766,13 @@ private fun HabitMetricItem(
                 modifier = Modifier
                     .size(38.dp)
                     .clip(CircleShape)
-                    .background(CodeGuidePasskeyBg),
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = title,
-                    tint = CodeGuideNavy,
+                    tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -800,14 +789,14 @@ private fun HabitMetricItem(
                         text = title,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = CodeGuideNavy
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = score,
                         fontSize = 18.sp,
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
-                        color = CodeGuideNavy
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
@@ -821,7 +810,7 @@ private fun HabitMetricItem(
                     Text(
                         text = subtitle,
                         fontSize = 11.sp,
-                        color = CodeGuideTextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = tag,
@@ -841,7 +830,7 @@ private fun MentalHealthCopilotCard() {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = CodeGuideNavy
+        color = MaterialTheme.colorScheme.primary
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -897,7 +886,7 @@ private fun MentalHealthCopilotCard() {
                         Icon(
                             imageVector = Icons.Default.Schedule,
                             contentDescription = "Schedule",
-                            tint = CodeGuideNavy,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
@@ -905,7 +894,7 @@ private fun MentalHealthCopilotCard() {
                             text = "Ajustar descansos guiados",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = CodeGuideNavy
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -934,8 +923,8 @@ private fun ProjectLoadCard() {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = CodeGuideSurface,
-        border = BorderStroke(1.dp, CodeGuideBorder)
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Row(
@@ -947,13 +936,13 @@ private fun ProjectLoadCard() {
                     text = "Carga por Proyecto",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = CodeGuideNavy
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Icon(
                     imageVector = Icons.Default.Public,
                     contentDescription = "Globe",
-                    tint = CodeGuideTextSecondary,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -961,7 +950,7 @@ private fun ProjectLoadCard() {
             Text(
                 text = "Esfuerzo mental ponderado según lenguaje y alcance",
                 fontSize = 12.sp,
-                color = CodeGuideTextSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -972,13 +961,13 @@ private fun ProjectLoadCard() {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(CodeGuideNavy))
+                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "E-Commerce Microservices (Go)",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = CodeGuideNavy
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
@@ -986,15 +975,15 @@ private fun ProjectLoadCard() {
                     text = "72% (Moderada)",
                     fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace,
-                    color = CodeGuideTextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Spacer(modifier = Modifier.height(6.dp))
             LinearProgressIndicator(
                 progress = { 0.72f },
                 modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
-                color = CodeGuideNavy,
-                trackColor = CodeGuideBorder
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.outline
             )
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -1011,7 +1000,7 @@ private fun ProjectLoadCard() {
                         text = "App Móvil Multiplataforma (Flutter)",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = CodeGuideNavy
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
@@ -1019,7 +1008,7 @@ private fun ProjectLoadCard() {
                     text = "28% (Ligera)",
                     fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace,
-                    color = CodeGuideTextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Spacer(modifier = Modifier.height(6.dp))
@@ -1027,7 +1016,7 @@ private fun ProjectLoadCard() {
                 progress = { 0.28f },
                 modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
                 color = CodeGuideTeal,
-                trackColor = CodeGuideBorder
+                trackColor = MaterialTheme.colorScheme.outline
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -1043,7 +1032,7 @@ private fun ProjectLoadCard() {
                 Text(
                     text = "Sin detección de deuda de sueño o sobrecarga consecutiva.",
                     fontSize = 11.sp,
-                    color = CodeGuideTextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 15.sp
                 )
             }
@@ -1056,8 +1045,8 @@ private fun QualityOverVolumeCard() {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = CodeGuideSurface,
-        border = BorderStroke(1.dp, CodeGuideBorder)
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -1067,7 +1056,7 @@ private fun QualityOverVolumeCard() {
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(CodeGuidePasskeyBg),
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -1085,18 +1074,16 @@ private fun QualityOverVolumeCard() {
                     text = "Calidad sobre volumen",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = CodeGuideNavy
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "El código limpio nace de mentes despejadas. 5 días constantes valen más que un sprint con desveladas.",
                     fontSize = 12.sp,
-                    color = CodeGuideTextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 16.sp
                 )
             }
         }
     }
 }
-
-

@@ -24,13 +24,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
@@ -39,6 +36,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
@@ -53,36 +51,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tomasreyes.codeguide.R
 import com.tomasreyes.codeguide.data.model.EnergyLevel
 import com.tomasreyes.codeguide.data.model.MicroTask
 import com.tomasreyes.codeguide.ui.components.CodeGuideBottomNavigationBar
 import com.tomasreyes.codeguide.ui.components.CodeGuideLogo
-import com.tomasreyes.codeguide.ui.theme.CodeGuideBackground
-import com.tomasreyes.codeguide.ui.theme.CodeGuideBadgeBg
-import com.tomasreyes.codeguide.ui.theme.CodeGuideBorder
 import com.tomasreyes.codeguide.ui.theme.CodeGuideCyan
 import com.tomasreyes.codeguide.ui.theme.CodeGuideLink
-import com.tomasreyes.codeguide.ui.theme.CodeGuideNavy
-import com.tomasreyes.codeguide.ui.theme.CodeGuidePasskeyBg
-import com.tomasreyes.codeguide.ui.theme.CodeGuideSurface
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTeal
-import com.tomasreyes.codeguide.ui.theme.CodeGuideTextPrimary
-import com.tomasreyes.codeguide.ui.theme.CodeGuideTextSecondary
-import com.tomasreyes.codeguide.ui.theme.CodeGuideTheme
 import com.tomasreyes.codeguide.ui.viewmodel.CodeGuideViewModel
 
 /**
- * Pantalla Principal: "Hoy" (Totalmente Funcional con ViewModel)
+ * Pantalla Principal: "Hoy" (Avatar Sonic + Alineación de Completada)
  */
 @Composable
 fun TodayScreen(
@@ -108,21 +99,13 @@ fun TodayScreen(
                 }
             )
         },
-        containerColor = CodeGuideBackground
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            CodeGuideBackground,
-                            Color(0xFFEBF5FB),
-                            CodeGuideBackground
-                        )
-                    )
-                )
+                .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
                 modifier = Modifier
@@ -134,7 +117,7 @@ fun TodayScreen(
                 // 1. Encabezado
                 HeaderBar(streakDays = uiState.streakDays, onProfileClick = onNavigateToProfile)
 
-                // 2. Calibración Mental Funcional
+                // 2. Calibración Mental
                 MentalCalibrationCard(
                     selectedEnergy = uiState.energyLevel,
                     onEnergySelected = { level -> viewModel.setEnergyLevel(level) }
@@ -143,7 +126,7 @@ fun TodayScreen(
                 // 3. Sugerencia IA
                 AiSuggestionCard(onStartFocus = onNavigateToFocus)
 
-                // 4. Ruta de Hoy (Checklist Interactivo)
+                // 4. Ruta de Hoy
                 TodayRouteSection(
                     tasks = uiState.dailyTasks,
                     completedCount = uiState.completedDailyTasksCount,
@@ -162,7 +145,6 @@ fun TodayScreen(
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Dialog para agregar nueva tarea
             if (showAddTaskDialog) {
                 AddTaskDialog(
                     onDismiss = { showAddTaskDialog = false },
@@ -191,14 +173,14 @@ private fun HeaderBar(streakDays: Int, onProfileClick: () -> Unit = {}) {
                     text = "CodeGuide",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = CodeGuideNavy
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "HOY",
                     fontSize = 10.sp,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
-                    color = CodeGuideTextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     letterSpacing = 1.sp
                 )
             }
@@ -210,8 +192,8 @@ private fun HeaderBar(streakDays: Int, onProfileClick: () -> Unit = {}) {
         ) {
             Surface(
                 shape = RoundedCornerShape(50.dp),
-                color = CodeGuidePasskeyBg,
-                border = BorderStroke(1.dp, CodeGuideBorder)
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
@@ -223,7 +205,7 @@ private fun HeaderBar(streakDays: Int, onProfileClick: () -> Unit = {}) {
                         text = "${streakDays}d",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = CodeGuideNavy
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -234,16 +216,16 @@ private fun HeaderBar(streakDays: Int, onProfileClick: () -> Unit = {}) {
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = CodeGuideNavy,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(36.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
-                            text = "img",
+                            text = "TR",
                             fontSize = 11.sp,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
@@ -252,7 +234,7 @@ private fun HeaderBar(streakDays: Int, onProfileClick: () -> Unit = {}) {
                         .size(10.dp)
                         .clip(CircleShape)
                         .background(CodeGuideTeal)
-                        .border(1.5.dp, Color.White, CircleShape)
+                        .border(1.5.dp, MaterialTheme.colorScheme.surface, CircleShape)
                 )
             }
         }
@@ -267,8 +249,8 @@ private fun MentalCalibrationCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = CodeGuideSurface,
-        border = BorderStroke(1.dp, CodeGuideBorder)
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             Row(
@@ -281,13 +263,13 @@ private fun MentalCalibrationCard(
                         modifier = Modifier
                             .size(34.dp)
                             .clip(CircleShape)
-                            .background(CodeGuidePasskeyBg),
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = "Calibration",
-                            tint = CodeGuideNavy,
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -296,7 +278,7 @@ private fun MentalCalibrationCard(
                         text = "Calibración\nMental",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = CodeGuideNavy,
+                        color = MaterialTheme.colorScheme.onSurface,
                         lineHeight = 20.sp
                     )
                 }
@@ -304,7 +286,7 @@ private fun MentalCalibrationCard(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(50.dp))
-                        .background(CodeGuidePasskeyBg)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
                     Text(
@@ -322,7 +304,7 @@ private fun MentalCalibrationCard(
             Text(
                 text = "¿Cómo está tu ancho de banda cerebral hoy? CodeGuide adapta tus ramas de código según tu energía.",
                 fontSize = 12.sp,
-                color = CodeGuideTextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 16.sp
             )
 
@@ -365,7 +347,7 @@ private fun MentalCalibrationCard(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                color = CodeGuidePasskeyBg
+                color = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -379,14 +361,14 @@ private fun MentalCalibrationCard(
                         Text(
                             text = "Capacidad recomendada: ",
                             fontSize = 12.sp,
-                            color = CodeGuideTextPrimary
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = selectedEnergy.recommendedCapacity,
                             fontSize = 12.sp,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
-                            color = CodeGuideNavy
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
 
@@ -404,8 +386,8 @@ private fun MentalCalibrationCard(
                             .fillMaxWidth()
                             .height(6.dp)
                             .clip(RoundedCornerShape(3.dp)),
-                        color = CodeGuideNavy,
-                        trackColor = CodeGuideBorder
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.outline
                     )
                 }
             }
@@ -426,10 +408,10 @@ private fun EnergyOptionCard(
         onClick = onClick,
         modifier = modifier.height(84.dp),
         shape = RoundedCornerShape(14.dp),
-        color = if (isSelected) CodeGuidePasskeyBg else CodeGuideSurface,
+        color = if (isSelected) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface,
         border = BorderStroke(
             width = if (isSelected) 2.dp else 1.dp,
-            color = if (isSelected) CodeGuideNavy else CodeGuideBorder
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
         )
     ) {
         Column(
@@ -440,7 +422,7 @@ private fun EnergyOptionCard(
             Icon(
                 imageVector = icon,
                 contentDescription = title,
-                tint = if (isSelected) CodeGuideTeal else CodeGuideTextSecondary,
+                tint = if (isSelected) CodeGuideTeal else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.height(4.dp))
@@ -448,12 +430,12 @@ private fun EnergyOptionCard(
                 text = title,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                color = CodeGuideNavy
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = subtitle,
                 fontSize = 10.sp,
-                color = CodeGuideTextSecondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -464,7 +446,7 @@ private fun AiSuggestionCard(onStartFocus: () -> Unit) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = CodeGuideNavy
+        color = MaterialTheme.colorScheme.primary
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(
@@ -521,7 +503,9 @@ private fun AiSuggestionCard(onStartFocus: () -> Unit) {
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
-                lineHeight = 24.sp
+                lineHeight = 24.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -547,7 +531,7 @@ private fun AiSuggestionCard(onStartFocus: () -> Unit) {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
                         contentDescription = "Play",
-                        tint = CodeGuideNavy,
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
@@ -555,7 +539,7 @@ private fun AiSuggestionCard(onStartFocus: () -> Unit) {
                         text = "Iniciar bloque de enfoque",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = CodeGuideNavy
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -578,17 +562,17 @@ private fun TodayRouteSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Ruta de Hoy",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = CodeGuideNavy
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "$completedCount de $totalCount micro-tareas completadas",
                     fontSize = 12.sp,
-                    color = CodeGuideTextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -597,14 +581,14 @@ private fun TodayRouteSection(
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add Task",
-                        tint = CodeGuideNavy
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(50.dp))
-                        .background(CodeGuidePasskeyBg)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(
@@ -640,8 +624,8 @@ private fun TaskCheckItem(
         onClick = onToggle,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        color = CodeGuideSurface,
-        border = BorderStroke(1.dp, CodeGuideBorder)
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Row(
             modifier = Modifier.padding(14.dp),
@@ -651,10 +635,10 @@ private fun TaskCheckItem(
                 modifier = Modifier
                     .size(24.dp)
                     .clip(RoundedCornerShape(6.dp))
-                    .background(if (task.isCompleted) CodeGuideTeal else CodeGuidePasskeyBg)
+                    .background(if (task.isCompleted) CodeGuideTeal else MaterialTheme.colorScheme.surfaceVariant)
                     .border(
                         width = 1.dp,
-                        color = if (task.isCompleted) CodeGuideTeal else CodeGuideBorder,
+                        color = if (task.isCompleted) CodeGuideTeal else MaterialTheme.colorScheme.outline,
                         shape = RoundedCornerShape(6.dp)
                     ),
                 contentAlignment = Alignment.Center
@@ -681,14 +665,18 @@ private fun TaskCheckItem(
                         text = task.title,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (task.isCompleted) CodeGuideTextSecondary else CodeGuideTextPrimary,
-                        textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None
+                        color = if (task.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                        textDecoration = if (task.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "${task.durationMinutes}m",
                         fontSize = 12.sp,
                         fontFamily = FontFamily.Monospace,
-                        color = CodeGuideTextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -697,38 +685,54 @@ private fun TaskCheckItem(
                     Text(
                         text = task.description,
                         fontSize = 12.sp,
-                        color = CodeGuideTextSecondary,
-                        lineHeight = 15.sp
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 15.sp,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    task.tags.forEach { tag ->
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50.dp))
-                                .background(CodeGuidePasskeyBg)
-                                .padding(horizontal = 8.dp, vertical = 3.dp)
-                        ) {
-                            Text(
-                                text = tag,
-                                fontSize = 10.sp,
-                                fontFamily = FontFamily.Monospace,
-                                color = CodeGuideNavy
-                            )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        task.tags.forEach { tag ->
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(50.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                            ) {
+                                Text(
+                                    text = tag,
+                                    fontSize = 10.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
                     }
 
                     if (task.isCompleted) {
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "Completada",
                             fontSize = 10.sp,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
                             color = CodeGuideTeal,
-                            modifier = Modifier.padding(top = 3.dp)
+                            maxLines = 1,
+                            softWrap = false
                         )
                     }
                 }
@@ -743,8 +747,8 @@ private fun BreakdownTaskCard(onBreakdownClick: () -> Unit) {
         onClick = onBreakdownClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = CodeGuideSurface,
-        border = BorderStroke(1.dp, CodeGuideBorder)
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
         Row(
             modifier = Modifier.padding(14.dp),
@@ -759,13 +763,13 @@ private fun BreakdownTaskCard(onBreakdownClick: () -> Unit) {
                     modifier = Modifier
                         .size(36.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(CodeGuidePasskeyBg),
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Tune,
                         contentDescription = "Tune",
-                        tint = CodeGuideNavy,
+                        tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -775,12 +779,12 @@ private fun BreakdownTaskCard(onBreakdownClick: () -> Unit) {
                         text = "¿Tarea monolítica ...",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = CodeGuideNavy
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "Deja que CodeGuide la desglose",
                         fontSize = 12.sp,
-                        color = CodeGuideTextSecondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -788,7 +792,7 @@ private fun BreakdownTaskCard(onBreakdownClick: () -> Unit) {
             Button(
                 onClick = onBreakdownClick,
                 shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = CodeGuideNavy)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(text = "🔀", fontSize = 12.sp)
@@ -797,7 +801,7 @@ private fun BreakdownTaskCard(onBreakdownClick: () -> Unit) {
                         text = "Desglosar",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -810,7 +814,7 @@ private fun DailyQuoteCard() {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        color = CodeGuidePasskeyBg
+        color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Row(
             modifier = Modifier.padding(14.dp),
@@ -826,7 +830,7 @@ private fun DailyQuoteCard() {
             Text(
                 text = "El código sostenible nace de una mente descansada. Sin prisas, en flujo.",
                 fontSize = 12.sp,
-                color = CodeGuideTextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 16.sp
             )
         }
@@ -846,7 +850,7 @@ private fun AddTaskDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(text = "Agregar Micro-tarea", fontWeight = FontWeight.Bold, color = CodeGuideNavy)
+            Text(text = "Agregar Micro-tarea", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -855,8 +859,8 @@ private fun AddTaskDialog(
                     onValueChange = { title = it },
                     label = { Text("Título de la tarea") },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = CodeGuideTextPrimary,
-                        unfocusedTextColor = CodeGuideTextPrimary
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -866,8 +870,8 @@ private fun AddTaskDialog(
                     onValueChange = { description = it },
                     label = { Text("Descripción (opcional)") },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = CodeGuideTextPrimary,
-                        unfocusedTextColor = CodeGuideTextPrimary
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -876,8 +880,8 @@ private fun AddTaskDialog(
                     onValueChange = { duration = it },
                     label = { Text("Duración estimada (minutos)") },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = CodeGuideTextPrimary,
-                        unfocusedTextColor = CodeGuideTextPrimary
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -887,8 +891,8 @@ private fun AddTaskDialog(
                     onValueChange = { tag = it },
                     label = { Text("Etiquetas (separadas por coma)") },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = CodeGuideTextPrimary,
-                        unfocusedTextColor = CodeGuideTextPrimary
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                     ),
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
@@ -900,17 +904,15 @@ private fun AddTaskDialog(
                 onClick = {
                     onTaskAdded(title, description, duration.toIntOrNull() ?: 20, tag)
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = CodeGuideNavy)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text("Agregar")
+                Text("Agregar", color = MaterialTheme.colorScheme.onPrimary)
             }
         },
         dismissButton = {
-            Button(onClick = onDismiss, colors = ButtonDefaults.buttonColors(containerColor = CodeGuideBorder)) {
-                Text("Cancelar", color = CodeGuideNavy)
+            Button(onClick = onDismiss, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.outline)) {
+                Text("Cancelar", color = MaterialTheme.colorScheme.onSurface)
             }
         }
     )
 }
-
-

@@ -49,7 +49,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.tomasreyes.codeguide.ui.theme.CodeGuideBadgeBg
 import com.tomasreyes.codeguide.ui.theme.CodeGuideLink
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTeal
 import com.tomasreyes.codeguide.ui.viewmodel.AuthViewModel
@@ -128,7 +127,7 @@ fun ProfileScreen(
                                 Box(contentAlignment = Alignment.Center) {
                                     Text(
                                         text = "TR",
-                                        fontSize = 24.sp,
+                                        fontSize = 26.sp,
                                         fontFamily = FontFamily.Monospace,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.onPrimary
@@ -215,7 +214,6 @@ fun ProfileScreen(
 
                         Spacer(modifier = Modifier.height(14.dp))
 
-                        // Switch de Modo Oscuro
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,

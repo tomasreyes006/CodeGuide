@@ -38,6 +38,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -52,7 +53,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -60,28 +60,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tomasreyes.codeguide.ui.components.CodeGuideLogo
-import com.tomasreyes.codeguide.ui.theme.CodeGuideBackground
-import com.tomasreyes.codeguide.ui.theme.CodeGuideBadgeBg
-import com.tomasreyes.codeguide.ui.theme.CodeGuideBorder
 import com.tomasreyes.codeguide.ui.theme.CodeGuideCyan
 import com.tomasreyes.codeguide.ui.theme.CodeGuideLink
-import com.tomasreyes.codeguide.ui.theme.CodeGuideNavy
-import com.tomasreyes.codeguide.ui.theme.CodeGuidePasskeyBg
-import com.tomasreyes.codeguide.ui.theme.CodeGuideSurface
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTeal
-import com.tomasreyes.codeguide.ui.theme.CodeGuideTextPrimary
-import com.tomasreyes.codeguide.ui.theme.CodeGuideTextSecondary
-import com.tomasreyes.codeguide.ui.theme.CodeGuideTheme
 import com.tomasreyes.codeguide.ui.viewmodel.AuthState
 import com.tomasreyes.codeguide.ui.viewmodel.AuthViewModel
 
 /**
- * Ventana de Login (Inicio de Sesión con Firebase Auth + Estados)
+ * Ventana de Login (Inicio de Sesión)
  */
 @Composable
 fun LoginScreen(
@@ -100,15 +90,7 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        CodeGuideBackground,
-                        Color(0xFFEBF5FB),
-                        CodeGuideBackground
-                    )
-                )
-            )
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier
@@ -117,16 +99,14 @@ fun LoginScreen(
                 .padding(horizontal = 24.dp, vertical = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 1. Logo de la app
             CodeGuideLogo(iconSize = 72.dp)
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 2. Chip de versión / estado
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(50.dp))
-                    .background(CodeGuideBadgeBg)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
                     .padding(horizontal = 14.dp, vertical = 6.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -142,7 +122,7 @@ fun LoginScreen(
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = CodeGuideTeal,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
                         letterSpacing = 0.5.sp
                     )
                 }
@@ -150,22 +130,20 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // 3. Título principal
             Text(
                 text = "Inicia sesión en tu flujo",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = CodeGuideNavy,
+                color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // 4. Subtítulo
             Text(
                 text = "Sincroniza tus ramas, calibra tu energía mental diaria y programa sin sobrecarga cognitiva.",
                 fontSize = 13.sp,
-                color = CodeGuideTextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 lineHeight = 18.sp,
                 modifier = Modifier.padding(horizontal = 12.dp)
@@ -173,7 +151,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 5. OAuth Social Sign-In
             Button(
                 onClick = {
                     authViewModel.loginUser(email, password, onLoginSuccess)
@@ -182,7 +159,7 @@ fun LoginScreen(
                     .fillMaxWidth()
                     .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = CodeGuideNavy)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -193,7 +170,7 @@ fun LoginScreen(
                         Icon(
                             imageVector = Icons.Default.Code,
                             contentDescription = "GitHub",
-                            tint = Color.White,
+                            tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(10.dp))
@@ -201,14 +178,14 @@ fun LoginScreen(
                             text = "Continuar con GitHub",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                     Text(
                         text = "oauth:repo",
                         fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
-                        color = Color.White.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
                     )
                 }
             }
@@ -225,8 +202,8 @@ fun LoginScreen(
                         .weight(1f)
                         .height(44.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(containerColor = CodeGuideSurface),
-                    border = BorderStroke(1.dp, CodeGuideBorder)
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.surface),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = "🦊", fontSize = 14.sp)
@@ -235,7 +212,7 @@ fun LoginScreen(
                             text = "GitLab",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = CodeGuideTextPrimary
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -246,8 +223,8 @@ fun LoginScreen(
                         .weight(1f)
                         .height(44.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(containerColor = CodeGuideSurface),
-                    border = BorderStroke(1.dp, CodeGuideBorder)
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = MaterialTheme.colorScheme.surface),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = "🌐", fontSize = 14.sp)
@@ -256,7 +233,7 @@ fun LoginScreen(
                             text = "Workspace",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = CodeGuideTextPrimary
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -264,26 +241,24 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 6. Divisor "O INGRESA CON TU CORREO DEV"
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                HorizontalDivider(modifier = Modifier.weight(1f), color = CodeGuideBorder)
+                HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outline)
                 Text(
                     text = "O INGRESA CON TU CORREO DEV",
                     fontSize = 10.sp,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
-                    color = CodeGuideTextSecondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
-                HorizontalDivider(modifier = Modifier.weight(1f), color = CodeGuideBorder)
+                HorizontalDivider(modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.outline)
             }
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            // Mensaje de Error / Estado si aplica
             if (authState is AuthState.Error) {
                 Surface(
                     modifier = Modifier
@@ -302,7 +277,6 @@ fun LoginScreen(
                 }
             }
 
-            // 7. Campo Email State
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -312,7 +286,7 @@ fun LoginScreen(
                     text = "Email de trabajo / Personal",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = CodeGuideTextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "SSH & GPG sync",
@@ -333,26 +307,26 @@ fun LoginScreen(
                     Text(
                         text = "tu_alias@empresa.io",
                         fontSize = 14.sp,
-                        color = CodeGuideTextSecondary.copy(alpha = 0.5f)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                     )
                 },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Default.AlternateEmail,
                         contentDescription = "Email",
-                        tint = CodeGuideNavy.copy(alpha = 0.7f),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = CodeGuideTextPrimary,
-                    unfocusedTextColor = CodeGuideTextPrimary,
-                    focusedContainerColor = CodeGuideSurface,
-                    unfocusedContainerColor = CodeGuideSurface,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     focusedBorderColor = CodeGuideTeal,
-                    unfocusedBorderColor = CodeGuideBorder
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
                 ),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
@@ -360,7 +334,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // 8. Campo Contraseña State
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -370,13 +343,13 @@ fun LoginScreen(
                     text = "Contraseña maestra",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = CodeGuideTextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "Min. 12 caracteres",
                     fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace,
-                    color = CodeGuideTextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -390,7 +363,7 @@ fun LoginScreen(
                     Icon(
                         imageVector = Icons.Default.Lock,
                         contentDescription = "Lock",
-                        tint = CodeGuideNavy.copy(alpha = 0.7f),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
                     )
                 },
@@ -399,7 +372,7 @@ fun LoginScreen(
                         Icon(
                             imageVector = if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                             contentDescription = "Toggle visibility",
-                            tint = CodeGuideTextSecondary,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -407,12 +380,12 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = CodeGuideTextPrimary,
-                    unfocusedTextColor = CodeGuideTextPrimary,
-                    focusedContainerColor = CodeGuideSurface,
-                    unfocusedContainerColor = CodeGuideSurface,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     focusedBorderColor = CodeGuideTeal,
-                    unfocusedBorderColor = CodeGuideBorder
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
                 ),
                 singleLine = true,
                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation()
@@ -420,7 +393,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // 9. Checkbox & Olvidaste contraseña
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -432,7 +404,7 @@ fun LoginScreen(
                         onCheckedChange = { rememberDevice = it },
                         colors = CheckboxDefaults.colors(
                             checkedColor = CodeGuideLink,
-                            uncheckedColor = CodeGuideBorder
+                            uncheckedColor = MaterialTheme.colorScheme.outline
                         ),
                         modifier = Modifier.size(24.dp)
                     )
@@ -440,7 +412,7 @@ fun LoginScreen(
                     Text(
                         text = "Recordar este equipo",
                         fontSize = 13.sp,
-                        color = CodeGuideTextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 
@@ -455,7 +427,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            // 10. Botón Principal: Entrar al Modo Flujo
             Button(
                 onClick = {
                     authViewModel.loginUser(email, password, onLoginSuccess)
@@ -464,13 +435,13 @@ fun LoginScreen(
                     .fillMaxWidth()
                     .height(50.dp),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = CodeGuideNavy),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 enabled = authState !is AuthState.Loading
             ) {
                 if (authState is AuthState.Loading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(22.dp),
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         strokeWidth = 2.dp
                     )
                 } else {
@@ -486,13 +457,13 @@ fun LoginScreen(
                             text = "Entrar al Modo Flujo",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = "Arrow Forward",
-                            tint = Color.White,
+                            tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -501,13 +472,12 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // 11. Botón Passkey
             Surface(
                 onClick = { authViewModel.loginUser(email, password, onLoginSuccess) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                color = CodeGuidePasskeyBg,
-                border = BorderStroke(1.dp, CodeGuideBorder)
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -529,15 +499,15 @@ fun LoginScreen(
                             text = "Acceder con Passkey o Huella digital",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Medium,
-                            color = CodeGuideNavy
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
 
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(4.dp))
-                            .background(CodeGuideSurface)
-                            .border(1.dp, CodeGuideBorder, RoundedCornerShape(4.dp))
+                            .background(MaterialTheme.colorScheme.surface)
+                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
                         Text(
@@ -545,7 +515,7 @@ fun LoginScreen(
                             fontSize = 10.sp,
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
-                            color = CodeGuideNavy
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -553,12 +523,11 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 12. Registro
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "¿Aún no tienes cuenta? ",
                     fontSize = 13.sp,
-                    color = CodeGuideTextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "Regístrate gratis",
@@ -571,12 +540,11 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Footer
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(50.dp),
-                color = CodeGuideSurface,
-                border = BorderStroke(1.dp, CodeGuideBorder)
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
@@ -592,7 +560,7 @@ fun LoginScreen(
                     Text(
                         text = "Cifrado de extremo a extremo para tus repositorios y métricas de salud mental",
                         fontSize = 11.sp,
-                        color = CodeGuideTextSecondary,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = 14.sp
                     )
                 }
@@ -612,11 +580,9 @@ fun LoginScreen(
                     text = "Clusters activos  •  Latencia p99: 14ms",
                     fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace,
-                    color = CodeGuideTextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
     }
 }
-
-
