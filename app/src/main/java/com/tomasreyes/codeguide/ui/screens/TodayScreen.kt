@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -67,6 +68,7 @@ import com.tomasreyes.codeguide.data.model.EnergyLevel
 import com.tomasreyes.codeguide.data.model.MicroTask
 import com.tomasreyes.codeguide.ui.components.CodeGuideBottomNavigationBar
 import com.tomasreyes.codeguide.ui.components.CodeGuideLogo
+import com.tomasreyes.codeguide.ui.components.GeminiChatBottomSheet
 import com.tomasreyes.codeguide.ui.theme.CodeGuideCyan
 import com.tomasreyes.codeguide.ui.theme.CodeGuideLink
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTeal
@@ -85,8 +87,31 @@ fun TodayScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showAddTaskDialog by remember { mutableStateOf(false) }
+    var showGeminiChat by remember { mutableStateOf(false) }
 
     Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showGeminiChat = true },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = CodeGuideCyan,
+                shape = RoundedCornerShape(50.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "🤖", fontSize = 16.sp)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "Gemini AI",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+        },
         bottomBar = {
             CodeGuideBottomNavigationBar(
                 selectedTab = "Hoy",
@@ -136,8 +161,8 @@ fun TodayScreen(
                     onAddNewTaskClick = { showAddTaskDialog = true }
                 )
 
-                // 5. Promo Desglosar
-                BreakdownTaskCard(onBreakdownClick = { showAddTaskDialog = true })
+                // 5. Promo Desglosar con Gemini AI
+                BreakdownTaskCard(onBreakdownClick = { showGeminiChat = true })
 
                 // 6. Frase del Día
                 DailyQuoteCard()
@@ -151,6 +176,19 @@ fun TodayScreen(
                     onTaskAdded = { title, desc, duration, tag ->
                         viewModel.addDailyTask(title, desc, duration, tag)
                         showAddTaskDialog = false
+                    }
+                )
+            }
+
+            if (showGeminiChat) {
+                GeminiChatBottomSheet(
+                    currentEnergy = uiState.energyLevel,
+                    onDismiss = { showGeminiChat = false },
+                    onAddTasksToToday = { tasks ->
+                        tasks.forEach { title ->
+                            viewModel.addDailyTask(title, "Generada por Gemini AI Assistant", 20, "Gemini AI")
+                        }
+                        showGeminiChat = false
                     }
                 )
             }
