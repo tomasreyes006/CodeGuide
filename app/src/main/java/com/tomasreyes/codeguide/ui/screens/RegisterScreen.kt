@@ -59,9 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tomasreyes.codeguide.ui.components.CodeGuideLogo
-import com.tomasreyes.codeguide.ui.theme.CodeGuideCyan
-import com.tomasreyes.codeguide.ui.theme.CodeGuideLink
-import com.tomasreyes.codeguide.ui.theme.CodeGuideTeal
+import com.tomasreyes.codeguide.ui.theme.CodeGuideColors
 import com.tomasreyes.codeguide.ui.viewmodel.AuthState
 import com.tomasreyes.codeguide.ui.viewmodel.AuthViewModel
 
@@ -109,7 +107,7 @@ fun RegisterScreen(
                         modifier = Modifier
                             .size(7.dp)
                             .clip(CircleShape)
-                            .background(CodeGuideTeal)
+                            .background(CodeGuideColors.Teal)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
@@ -204,7 +202,7 @@ fun RegisterScreen(
                             unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                             focusedContainerColor = MaterialTheme.colorScheme.surface,
                             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedBorderColor = CodeGuideTeal,
+                            focusedBorderColor = CodeGuideColors.Teal,
                             unfocusedBorderColor = MaterialTheme.colorScheme.outline
                         ),
                         singleLine = true
@@ -244,7 +242,7 @@ fun RegisterScreen(
                             unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                             focusedContainerColor = MaterialTheme.colorScheme.surface,
                             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedBorderColor = CodeGuideTeal,
+                            focusedBorderColor = CodeGuideColors.Teal,
                             unfocusedBorderColor = MaterialTheme.colorScheme.outline
                         ),
                         singleLine = true,
@@ -301,7 +299,7 @@ fun RegisterScreen(
                             unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                             focusedContainerColor = MaterialTheme.colorScheme.surface,
                             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedBorderColor = CodeGuideTeal,
+                            focusedBorderColor = CodeGuideColors.Teal,
                             unfocusedBorderColor = MaterialTheme.colorScheme.outline
                         ),
                         singleLine = true,
@@ -336,7 +334,7 @@ fun RegisterScreen(
                             unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                             focusedContainerColor = MaterialTheme.colorScheme.surface,
                             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedBorderColor = CodeGuideTeal,
+                            focusedBorderColor = CodeGuideColors.Teal,
                             unfocusedBorderColor = MaterialTheme.colorScheme.outline
                         ),
                         singleLine = true,
@@ -367,7 +365,7 @@ fun RegisterScreen(
                                 Icon(
                                     imageVector = Icons.Default.Bolt,
                                     contentDescription = "Bolt",
-                                    tint = CodeGuideCyan,
+                                    tint = CodeGuideColors.Cyan,
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -392,7 +390,7 @@ fun RegisterScreen(
 
                     OutlinedButton(
                         onClick = {
-                            authViewModel.signInWithGoogle(onSuccess = onRegisterSuccess)
+                            authViewModel.signInWithGoogleToken("google_id_token", onRegisterSuccess)
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -427,7 +425,7 @@ fun RegisterScreen(
                     text = "Inicia sesión",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = CodeGuideLink,
+                    color = CodeGuideColors.Link,
                     modifier = Modifier.clickable { onNavigateToLogin() }
                 )
             }

@@ -69,9 +69,19 @@ import com.tomasreyes.codeguide.ui.theme.CodeGuideLink
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTeal
 import com.tomasreyes.codeguide.ui.viewmodel.AuthState
 import com.tomasreyes.codeguide.ui.viewmodel.AuthViewModel
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import kotlinx.coroutines.launch
+
+
 
 /**
- * Ventana de Login (Inicio de Sesión)
+ * Ventana de Login (Inicio de Sesión Real con Firebase Auth y Google Sign In)
  */
 @Composable
 fun LoginScreen(
@@ -79,13 +89,18 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit = {},
     onNavigateToForgotPassword: () -> Unit = {},
     onLoginSuccess: () -> Unit = {}
+
 ) {
-    var email by remember { mutableStateOf("tomas.reyes@codeguide.io") }
+    var email by remember { mutableStateOf("dev@codeguide.io") }
     var password by remember { mutableStateOf("123456789012") }
     var isPasswordVisible by remember { mutableStateOf(false) }
     var rememberDevice by remember { mutableStateOf(true) }
 
     val authState by authViewModel.authState.collectAsState()
+
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val credentialManager = remember { CredentialManager.create(context) }
 
     Box(
         modifier = Modifier
@@ -151,10 +166,36 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botón Google Sign-In (Firebase Auth)
+            // Botón Google Sign-In Real (Firebase Auth)
             OutlinedButton(
                 onClick = {
-                    authViewModel.signInWithGoogle(onSuccess = onLoginSuccess)
+                    coroutineScope.launch {
+                        try {
+                            val googleIdOption = GetGoogleIdOption.Builder()
+                                .setFilterByAuthorizedAccounts(false)
+                                .setServerClientId("587989380494-v89vq9t5vbdmn9vrj18hq75p6nf786j2.apps.googleusercontent.com")
+                                .build()
+
+                            val request = GetCredentialRequest.Builder()
+                                .addCredentialOption(googleIdOption)
+                                .build()
+
+                            val result = credentialManager.getCredential(context, request)
+                            val credential = result.credential
+
+                            if (credential is CustomCredential &&
+                                credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+
+                                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                                val realIdToken = googleIdTokenCredential.idToken // Token real de Google
+
+                                // Sincronizamos con tu ViewModel y navegación existentes
+                                authViewModel.signInWithGoogleToken(realIdToken, onLoginSuccess)
+                            }
+                        } catch (e: Exception) {
+                            android.util.Log.e("GoogleAuth", "Error al iniciar sesión: ${e.message}")
+                        }
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()

@@ -26,3 +26,21 @@ val CodeGuideDarkBorder = Color(0xFF23344E)        // Dark border
 val CodeGuideDarkTextPrimary = Color(0xFFF8FAFC)   // Crisp light text
 val CodeGuideDarkTextSecondary = Color(0xFF94A3B8) // Muted light text
 val CodeGuideDarkBadgeBg = Color(0xFF0F2D32)       // Dark badge background
+
+// Object Container for zero-ambiguity IDE resolution
+object CodeGuideColors {
+    val Navy = Color(0xFF0F172A)
+    val NavyLight = Color(0xFF1E293B)
+    val Teal = Color(0xFF0D9488)
+    val TealBright = Color(0xFF14B8A6)
+    val TealLight = Color(0xFFCCFBF1)
+    val Cyan = Color(0xFF06B6D4)
+    val Background = Color(0xFFF4F8FA)
+    val Surface = Color(0xFFFFFFFF)
+    val Border = Color(0xFFE2E8F0)
+    val TextPrimary = Color(0xFF0F172A)
+    val TextSecondary = Color(0xFF64748B)
+    val BadgeBg = Color(0xFFE6F4F1)
+    val PasskeyBg = Color(0xFFEDF5FD)
+    val Link = Color(0xFF0284C7)
+}

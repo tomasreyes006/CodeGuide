@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "587989380494",
+    "project_id": "codeguide-e74f7",
+    "storage_bucket": "codeguide-e74f7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:587989380494:android:1a6b5234c98a1df46308df",
+        "android_client_info": {
+          "package_name": "com.tomasreyes.codeguide"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "587989380494-l66ldsf89nafkhfoa9r9h6j0hh4a06ek.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tomasreyes.codeguide",
+            "certificate_hash": "8999f20a3fa4fb4f8736f5e045280d650f79560f"
+          }
+        },
+        {
+          "client_id": "587989380494-v89vq9t5vbdmn9vrj18hq75p6nf786j2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBqUo-6km3ZNrZ565ZgUZbfjK5BEplsHeU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "587989380494-v89vq9t5vbdmn9vrj18hq75p6nf786j2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

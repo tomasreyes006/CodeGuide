@@ -1,6 +1,7 @@
 package com.tomasreyes.codeguide.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -257,15 +258,12 @@ private fun HeaderBar(streakDays: Int, onProfileClick: () -> Unit = {}) {
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(36.dp)
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = "TR",
-                            fontSize = 11.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
+                    Image(
+                        painter = painterResource(id = R.drawable.fototomas),
+                        contentDescription = "Foto de Tomás Reyes",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
                 Box(
                     modifier = Modifier

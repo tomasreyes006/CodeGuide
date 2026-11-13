@@ -3,7 +3,7 @@ package com.tomasreyes.codeguide.ui.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.tomasreyes.codeguide.data.local.CodeGuideDatabaseManager
+import com.tomasreyes.codeguide.data.local.CodeGuideJsonManager
 import com.tomasreyes.codeguide.data.model.AmbientAudio
 import com.tomasreyes.codeguide.data.model.EnergyLevel
 import com.tomasreyes.codeguide.data.model.FocusMood
@@ -141,7 +141,7 @@ class CodeGuideViewModel(application: Application) : AndroidViewModel(applicatio
 
     init {
         // Cargar Base de Datos Local al iniciar la aplicación
-        val savedState = CodeGuideDatabaseManager.loadFromDatabase(application)
+        val savedState = CodeGuideJsonManager.loadFromDatabase(application)
         if (savedState != null) {
             _uiState.value = savedState
         }
@@ -149,7 +149,7 @@ class CodeGuideViewModel(application: Application) : AndroidViewModel(applicatio
 
     private fun persistState() {
         viewModelScope.launch(Dispatchers.IO) {
-            CodeGuideDatabaseManager.saveToDatabase(getApplication(), _uiState.value)
+            CodeGuideJsonManager.saveToDatabase(getApplication(), _uiState.value)
         }
     }
 

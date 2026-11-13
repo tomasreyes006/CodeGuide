@@ -1,6 +1,7 @@
 package com.tomasreyes.codeguide.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -58,12 +59,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tomasreyes.codeguide.R
 import com.tomasreyes.codeguide.data.model.ProjectItem
 import com.tomasreyes.codeguide.data.model.ProjectStatus
 import com.tomasreyes.codeguide.ui.components.CodeGuideBottomNavigationBar
@@ -305,15 +309,12 @@ private fun HeaderBarProjects(onProfileClick: () -> Unit = {}) {
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(36.dp)
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = "TR",
-                            fontSize = 11.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
+                    Image(
+                        painter = painterResource(id = R.drawable.fototomas),
+                        contentDescription = "Foto de Tomás Reyes",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
                 Box(
                     modifier = Modifier
