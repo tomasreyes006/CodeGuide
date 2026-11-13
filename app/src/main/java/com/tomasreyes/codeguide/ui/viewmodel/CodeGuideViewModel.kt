@@ -1,13 +1,16 @@
 package com.tomasreyes.codeguide.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.tomasreyes.codeguide.data.local.CodeGuideDatabaseManager
 import com.tomasreyes.codeguide.data.model.AmbientAudio
 import com.tomasreyes.codeguide.data.model.EnergyLevel
 import com.tomasreyes.codeguide.data.model.FocusMood
 import com.tomasreyes.codeguide.data.model.MicroTask
 import com.tomasreyes.codeguide.data.model.ProjectItem
 import com.tomasreyes.codeguide.data.model.ProjectStatus
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -129,12 +132,26 @@ data class CodeGuideUiState(
         }
 }
 
-class CodeGuideViewModel : ViewModel() {
+class CodeGuideViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(CodeGuideUiState())
     val uiState: StateFlow<CodeGuideUiState> = _uiState.asStateFlow()
 
     private var timerJob: Job? = null
+
+    init {
+        // Cargar Base de Datos Local al iniciar la aplicación
+        val savedState = CodeGuideDatabaseManager.loadFromDatabase(application)
+        if (savedState != null) {
+            _uiState.value = savedState
+        }
+    }
+
+    private fun persistState() {
+        viewModelScope.launch(Dispatchers.IO) {
+            CodeGuideDatabaseManager.saveToDatabase(getApplication(), _uiState.value)
+        }
+    }
 
     // --- ACCIONES DE HOY / TAREAS DIARIAS ---
     fun toggleDailyTask(taskId: String) {
@@ -144,6 +161,7 @@ class CodeGuideViewModel : ViewModel() {
             } else task
         }
         _uiState.value = _uiState.value.copy(dailyTasks = updatedTasks)
+        persistState()
     }
 
     fun addDailyTask(title: String, description: String?, durationMinutes: Int, tagText: String) {
@@ -158,10 +176,12 @@ class CodeGuideViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(
             dailyTasks = _uiState.value.dailyTasks + newTask
         )
+        persistState()
     }
 
     fun setEnergyLevel(level: EnergyLevel) {
         _uiState.value = _uiState.value.copy(energyLevel = level)
+        persistState()
     }
 
     // --- ACCIONES DE PROYECTOS ---
@@ -189,15 +209,18 @@ class CodeGuideViewModel : ViewModel() {
         _uiState.value = _uiState.value.copy(
             projectsList = _uiState.value.projectsList + newProject
         )
+        persistState()
     }
 
     fun deleteProject(projectId: String) {
         val updatedProjects = _uiState.value.projectsList.filter { it.id != projectId }
         _uiState.value = _uiState.value.copy(projectsList = updatedProjects)
+        persistState()
     }
 
     fun toggleDarkMode() {
         _uiState.value = _uiState.value.copy(isDarkMode = !_uiState.value.isDarkMode)
+        persistState()
     }
 
     // --- ACCIONES DE ENFOQUE / TIMER ---
@@ -247,6 +270,7 @@ class CodeGuideViewModel : ViewModel() {
             timerSecondsRemaining = _uiState.value.focusMood.minutes * 60,
             clarityIndex = min(100, _uiState.value.clarityIndex + 1)
         )
+        persistState()
     }
 
     fun startBreak(minutes: Int = 5) {
