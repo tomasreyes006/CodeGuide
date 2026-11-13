@@ -14,7 +14,9 @@
 <br><br>
 
 ### -Julián Andrés Malagón
-
+<br><br>
+![Foto de Julián Malagón](C:\Users\rusha\AndroidStudioProjects\CodeGuide\app\src\main\res\drawable\fotojulian.jpeg)
+<br><br>
 ### Universidad Autónoma de Bucaramanga
 ### Fecha de presentación: Viernes 13 de noviembre de 2026
 ### Tecnologías Móviles
