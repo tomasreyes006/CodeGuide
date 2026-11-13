@@ -4,18 +4,18 @@
 
 ### -Tomás David Reyes Salazar
 <br><br>
-![Foto de Tomás Reyes](C:\Users\rusha\AndroidStudioProjects\CodeGuide\app\src\main\res\drawable\fototomas.jpeg)
+![Foto de Tomás Reyes](app/src/main/res/drawable/fototomas.jpeg)
 <br><br>
 
 ### -Juan David Mateus Poveda
-
 <br><br>
-![Foto de Juan Mateus](C:\Users\rusha\AndroidStudioProjects\CodeGuide\app\src\main\res\drawable\fotomateus.jpeg)
+![Foto de Juan Mateus](app/src/main/res/drawable/fotomateus.jpeg)
+
 <br><br>
 
 ### -Julián Andrés Malagón
 <br><br>
-![Foto de Julián Malagón](C:\Users\rusha\AndroidStudioProjects\CodeGuide\app\src\main\res\drawable\fotojulian.jpeg)
+![Foto de Julián Malagón](app/src/main/res/drawable/fotojulian.jpeg)
 <br><br>
 ### Universidad Autónoma de Bucaramanga
 ### Fecha de presentación: Viernes 13 de noviembre de 2026
