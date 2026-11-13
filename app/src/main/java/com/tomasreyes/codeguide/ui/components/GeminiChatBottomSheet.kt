@@ -2,15 +2,18 @@ package com.tomasreyes.codeguide.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -129,6 +132,8 @@ fun GeminiChatBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
+                .imePadding()
                 .padding(horizontal = 20.dp, vertical = 14.dp)
         ) {
             // Header del Chat
@@ -247,12 +252,13 @@ fun GeminiChatBottomSheet(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Lista de Mensajes del Chat
+            // Lista de Mensajes del Chat con ajuste flexible según teclado
             LazyColumn(
                 state = listState,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp),
+                    .weight(1f, fill = false)
+                    .height(280.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(messages, key = { it.id }) { message ->
@@ -310,7 +316,7 @@ fun GeminiChatBottomSheet(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Input del Chat
+            // Input del Chat (Siempre visible arriba del teclado)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -356,7 +362,6 @@ fun GeminiChatBottomSheet(
 
                             coroutineScope.launch {
                                 try {
-                                    // Intentar consulta mediante SDK Gemini o respuesta inteligente calibrada
                                     val systemPrompt = "Desglosa en micro-pasos de 15-20 minutos considerando nivel de energía ${currentEnergy.title}: $promptToSend"
                                     val response = try {
                                         generativeModel.generateContent(systemPrompt).text
@@ -430,7 +435,7 @@ private fun ChatMessageItem(
                         fontSize = 10.sp,
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
-                        color = if (isUser) Color.White.copy(alpha = 0.8f) else CodeGuideLink
+                        color = if (isUser) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f) else CodeGuideLink
                     )
                 }
 
@@ -439,7 +444,7 @@ private fun ChatMessageItem(
                 Text(
                     text = message.text,
                     fontSize = 13.sp,
-                    color = if (isUser) Color.White else MaterialTheme.colorScheme.onSurface,
+                    color = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                     lineHeight = 18.sp
                 )
 

@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -14,10 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tomasreyes.codeguide.ui.theme.CodeGuideNavy
-import com.tomasreyes.codeguide.ui.theme.CodeGuidePasskeyBg
-import com.tomasreyes.codeguide.ui.theme.CodeGuideSurface
-import com.tomasreyes.codeguide.ui.theme.CodeGuideTextSecondary
 
 @Composable
 fun CodeGuideBottomNavigationBar(
@@ -25,7 +22,7 @@ fun CodeGuideBottomNavigationBar(
     onTabSelected: (String) -> Unit
 ) {
     NavigationBar(
-        containerColor = CodeGuideSurface,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp
     ) {
         NavigationBarItem(
@@ -39,11 +36,11 @@ fun CodeGuideBottomNavigationBar(
             },
             label = { Text(text = "Hoy", fontSize = 11.sp, fontWeight = FontWeight.SemiBold) },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = CodeGuideNavy,
-                selectedTextColor = CodeGuideNavy,
-                indicatorColor = CodeGuidePasskeyBg,
-                unselectedIconColor = CodeGuideTextSecondary,
-                unselectedTextColor = CodeGuideTextSecondary
+                selectedIconColor = MaterialTheme.colorScheme.onSurface,
+                selectedTextColor = MaterialTheme.colorScheme.onSurface,
+                indicatorColor = MaterialTheme.colorScheme.surfaceVariant,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         )
 
@@ -58,11 +55,11 @@ fun CodeGuideBottomNavigationBar(
             },
             label = { Text(text = "Proyectos", fontSize = 11.sp) },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = CodeGuideNavy,
-                selectedTextColor = CodeGuideNavy,
-                indicatorColor = CodeGuidePasskeyBg,
-                unselectedIconColor = CodeGuideTextSecondary,
-                unselectedTextColor = CodeGuideTextSecondary
+                selectedIconColor = MaterialTheme.colorScheme.onSurface,
+                selectedTextColor = MaterialTheme.colorScheme.onSurface,
+                indicatorColor = MaterialTheme.colorScheme.surfaceVariant,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         )
 
@@ -77,11 +74,11 @@ fun CodeGuideBottomNavigationBar(
             },
             label = { Text(text = "Enfoque", fontSize = 11.sp) },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = CodeGuideNavy,
-                selectedTextColor = CodeGuideNavy,
-                indicatorColor = CodeGuidePasskeyBg,
-                unselectedIconColor = CodeGuideTextSecondary,
-                unselectedTextColor = CodeGuideTextSecondary
+                selectedIconColor = MaterialTheme.colorScheme.onSurface,
+                selectedTextColor = MaterialTheme.colorScheme.onSurface,
+                indicatorColor = MaterialTheme.colorScheme.surfaceVariant,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         )
 
@@ -96,11 +93,11 @@ fun CodeGuideBottomNavigationBar(
             },
             label = { Text(text = "Métricas", fontSize = 11.sp) },
             colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = CodeGuideNavy,
-                selectedTextColor = CodeGuideNavy,
-                indicatorColor = CodeGuidePasskeyBg,
-                unselectedIconColor = CodeGuideTextSecondary,
-                unselectedTextColor = CodeGuideTextSecondary
+                selectedIconColor = MaterialTheme.colorScheme.onSurface,
+                selectedTextColor = MaterialTheme.colorScheme.onSurface,
+                indicatorColor = MaterialTheme.colorScheme.surfaceVariant,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         )
     }

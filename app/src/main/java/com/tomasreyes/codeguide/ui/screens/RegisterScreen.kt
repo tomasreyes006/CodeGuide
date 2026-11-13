@@ -48,7 +48,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -56,25 +55,19 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tomasreyes.codeguide.ui.components.CodeGuideLogo
-import com.tomasreyes.codeguide.ui.theme.CodeGuideBackground
-import com.tomasreyes.codeguide.ui.theme.CodeGuideBadgeBg
-import com.tomasreyes.codeguide.ui.theme.CodeGuideBorder
 import com.tomasreyes.codeguide.ui.theme.CodeGuideCyan
 import com.tomasreyes.codeguide.ui.theme.CodeGuideLink
-import com.tomasreyes.codeguide.ui.theme.CodeGuideNavy
-import com.tomasreyes.codeguide.ui.theme.CodeGuideSurface
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTeal
-import com.tomasreyes.codeguide.ui.theme.CodeGuideTextPrimary
-import com.tomasreyes.codeguide.ui.theme.CodeGuideTextSecondary
-import com.tomasreyes.codeguide.ui.theme.CodeGuideTheme
 import com.tomasreyes.codeguide.ui.viewmodel.AuthState
 import com.tomasreyes.codeguide.ui.viewmodel.AuthViewModel
 
+/**
+ * Ventana de Registro (Crear Cuenta)
+ */
 @Composable
 fun RegisterScreen(
     authViewModel: AuthViewModel = viewModel(),
@@ -92,31 +85,23 @@ fun RegisterScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        CodeGuideBackground,
-                        Color(0xFFEBF5FB),
-                        CodeGuideBackground
-                    )
-                )
-            )
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 32.dp),
+                .padding(horizontal = 24.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CodeGuideLogo(iconSize = 72.dp)
+            CodeGuideLogo(iconSize = 64.dp)
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(50.dp))
-                    .background(CodeGuideBadgeBg)
+                    .background(MaterialTheme.colorScheme.secondaryContainer)
                     .padding(horizontal = 14.dp, vertical = 6.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -128,70 +113,70 @@ fun RegisterScreen(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "NUEVO DESARROLLADOR",
+                        text = "ÚNETE A CODEGUIDE",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = CodeGuideTeal,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
                         letterSpacing = 0.5.sp
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = "Crea tu cuenta en CodeGuide",
-                fontSize = 24.sp,
+                text = "Crea tu espacio de trabajo",
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = CodeGuideNavy,
+                color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "Comienza a estructurar tus proyectos en pasos alcanzables y domina tu desarrollo.",
-                fontSize = 13.sp,
-                color = CodeGuideTextSecondary,
+                text = "Organiza tus micro-tareas, conecta tus repositorios Git y programa al ritmo de tu energía mental.",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
-                lineHeight = 18.sp,
+                lineHeight = 16.sp,
                 modifier = Modifier.padding(horizontal = 12.dp)
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            if (authState is AuthState.Error) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    color = Color(0xFFFFE4E6),
-                    border = BorderStroke(1.dp, Color(0xFFE11D48))
-                ) {
-                    Text(
-                        text = (authState as AuthState.Error).message,
-                        fontSize = 12.sp,
-                        color = Color(0xFFE11D48),
-                        modifier = Modifier.padding(10.dp)
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.height(20.dp))
 
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                color = CodeGuideSurface,
-                border = BorderStroke(1.dp, CodeGuideBorder)
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
 
+                    if (authState is AuthState.Error) {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 12.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color(0xFFFFE4E6),
+                            border = BorderStroke(1.dp, Color(0xFFE11D48))
+                        ) {
+                            Text(
+                                text = (authState as AuthState.Error).message,
+                                fontSize = 12.sp,
+                                color = Color(0xFFE11D48),
+                                modifier = Modifier.padding(10.dp)
+                            )
+                        }
+                    }
+
                     Text(
-                        text = "Nombre completo / Dev alias",
+                        text = "Nombre completo / Alias Dev",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = CodeGuideTextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(
@@ -199,26 +184,28 @@ fun RegisterScreen(
                         onValueChange = { name = it },
                         placeholder = {
                             Text(
-                                text = "Ej: Carlos Mendoza",
+                                text = "Carlos Reyes",
                                 fontSize = 14.sp,
-                                color = CodeGuideTextSecondary.copy(alpha = 0.5f)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                             )
                         },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.Person,
-                                contentDescription = "User",
-                                tint = CodeGuideNavy.copy(alpha = 0.7f),
+                                contentDescription = "Name",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(18.dp)
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = CodeGuideTextPrimary,
-                            unfocusedTextColor = CodeGuideTextPrimary,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                             focusedBorderColor = CodeGuideTeal,
-                            unfocusedBorderColor = CodeGuideBorder
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
                         ),
                         singleLine = true
                     )
@@ -229,7 +216,7 @@ fun RegisterScreen(
                         text = "Email de trabajo / Personal",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = CodeGuideTextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(
@@ -239,24 +226,26 @@ fun RegisterScreen(
                             Text(
                                 text = "carlos.dev@empresa.io",
                                 fontSize = 14.sp,
-                                color = CodeGuideTextSecondary.copy(alpha = 0.5f)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                             )
                         },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Default.AlternateEmail,
                                 contentDescription = "Email",
-                                tint = CodeGuideNavy.copy(alpha = 0.7f),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(18.dp)
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = CodeGuideTextPrimary,
-                            unfocusedTextColor = CodeGuideTextPrimary,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                             focusedBorderColor = CodeGuideTeal,
-                            unfocusedBorderColor = CodeGuideBorder
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
                         ),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
@@ -273,13 +262,13 @@ fun RegisterScreen(
                             text = "Contraseña maestra",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = CodeGuideTextPrimary
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = "Min. 12 caracteres",
                             fontSize = 11.sp,
                             fontFamily = FontFamily.Monospace,
-                            color = CodeGuideTextSecondary
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Spacer(modifier = Modifier.height(6.dp))
@@ -291,7 +280,7 @@ fun RegisterScreen(
                             Icon(
                                 imageVector = Icons.Default.Lock,
                                 contentDescription = "Lock",
-                                tint = CodeGuideNavy.copy(alpha = 0.7f),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(18.dp)
                             )
                         },
@@ -300,7 +289,7 @@ fun RegisterScreen(
                                 Icon(
                                     imageVector = if (isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                                     contentDescription = "Toggle visibility",
-                                    tint = CodeGuideTextSecondary,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -308,10 +297,12 @@ fun RegisterScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = CodeGuideTextPrimary,
-                            unfocusedTextColor = CodeGuideTextPrimary,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                             focusedBorderColor = CodeGuideTeal,
-                            unfocusedBorderColor = CodeGuideBorder
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
                         ),
                         singleLine = true,
                         visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation()
@@ -323,7 +314,7 @@ fun RegisterScreen(
                         text = "Confirmar contraseña",
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = CodeGuideTextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(
@@ -334,17 +325,19 @@ fun RegisterScreen(
                             Icon(
                                 imageVector = Icons.Default.Badge,
                                 contentDescription = "Confirm Lock",
-                                tint = CodeGuideNavy.copy(alpha = 0.7f),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(18.dp)
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = CodeGuideTextPrimary,
-                            unfocusedTextColor = CodeGuideTextPrimary,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                             focusedBorderColor = CodeGuideTeal,
-                            unfocusedBorderColor = CodeGuideBorder
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
                         ),
                         singleLine = true,
                         visualTransformation = PasswordVisualTransformation()
@@ -422,13 +415,13 @@ fun RegisterScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "¿Ya tienes una cuenta? ",
+                    text = "¿Ya tienes cuenta en CodeGuide? ",
                     fontSize = 13.sp,
-                    color = CodeGuideTextSecondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "Inicia sesión",
@@ -441,5 +434,3 @@ fun RegisterScreen(
         }
     }
 }
-
-
