@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.core.view.WindowCompat.enableEdgeToEdge
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tomasreyes.codeguide.ui.navigation.CodeGuideNavigation
 import com.tomasreyes.codeguide.ui.theme.CodeGuideTheme

@@ -65,6 +65,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tomasreyes.codeguide.R
 import com.tomasreyes.codeguide.data.model.AmbientAudio
 import com.tomasreyes.codeguide.data.model.FocusMood
+import com.tomasreyes.codeguide.data.model.SessionType
 import com.tomasreyes.codeguide.ui.components.CodeGuideBottomNavigationBar
 import com.tomasreyes.codeguide.ui.components.CodeGuideLogo
 import com.tomasreyes.codeguide.ui.theme.CodeGuideCyan
@@ -117,7 +118,7 @@ fun FocusScreen(
                 HeaderBarFocus(streakDays = uiState.streakDays, onProfileClick = onNavigateToProfile)
 
                 // 2. Sesión
-                FlowSessionHeaderCard()
+                FlowSessionHeaderCard(sessionType = uiState.sessionType)
 
                 // 3. Mood Selector
                 EnergyAndMoodCard(
@@ -128,7 +129,8 @@ fun FocusScreen(
                 // 4. Temporizador
                 CircularTimerCard(
                     formattedTime = uiState.formattedTimerText,
-                    isRunning = uiState.isTimerRunning
+                    isRunning = uiState.isTimerRunning,
+                    sessionType = uiState.sessionType
                 )
 
                 // 5. Micro-tarea Activa
@@ -138,7 +140,7 @@ fun FocusScreen(
                 FocusControlButtons(
                     isRunning = uiState.isTimerRunning,
                     onStartPause = { viewModel.startOrPauseTimer() },
-                    onComplete = { viewModel.completeFocusBlock() },
+                    onComplete = { viewModel.completeCurrentBlock() },
                     onTakeBreak = { viewModel.startBreak(5) }
                 )
 
@@ -244,7 +246,7 @@ private fun HeaderBarFocus(streakDays: Int, onProfileClick: () -> Unit = {}) {
 }
 
 @Composable
-private fun FlowSessionHeaderCard() {
+private fun FlowSessionHeaderCard(sessionType: SessionType) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -283,7 +285,7 @@ private fun FlowSessionHeaderCard() {
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "Modo Enfoque ...",
+                        text = if (sessionType == SessionType.BREAK) "Modo Descanso..." else "Modo Enfoque ...",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -432,7 +434,8 @@ private fun MoodCard(
 @Composable
 private fun CircularTimerCard(
     formattedTime: String,
-    isRunning: Boolean
+    isRunning: Boolean,
+    sessionType: SessionType
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -474,7 +477,7 @@ private fun CircularTimerCard(
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "TIEMPO RESTANTE",
+                        text = if (sessionType == SessionType.BREAK) "DESCANSO EN CURSO" else "TIEMPO RESTANTE",
                         fontSize = 10.sp,
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
@@ -501,10 +504,10 @@ private fun CircularTimerCard(
                             .padding(horizontal = 12.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = if (isRunning) "En marcha..." else "Bloque listo",
+                            text = if (sessionType == SessionType.BREAK) "☕ Descanso activo" else if (isRunning) "En marcha..." else "Bloque listo",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isRunning) CodeGuideTeal else CodeGuideLink
+                            color = if (sessionType == SessionType.BREAK) CodeGuideTeal else if (isRunning) CodeGuideTeal else CodeGuideLink
                         )
                     }
                 }

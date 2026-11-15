@@ -10,6 +10,7 @@ import com.tomasreyes.codeguide.data.model.FocusMood
 import com.tomasreyes.codeguide.data.model.MicroTask
 import com.tomasreyes.codeguide.data.model.ProjectItem
 import com.tomasreyes.codeguide.data.model.ProjectStatus
+import com.tomasreyes.codeguide.data.model.SessionType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -101,6 +102,7 @@ data class CodeGuideUiState(
 
     // State 3: Temporizador de Enfoque
     val focusMood: FocusMood = FocusMood.ZEN,
+    val sessionType: SessionType = SessionType.FOCUS,
     val timerSecondsRemaining: Int = 25 * 60,
     val isTimerRunning: Boolean = false,
     val activeAudio: AmbientAudio = AmbientAudio.LOFI,
@@ -228,6 +230,7 @@ class CodeGuideViewModel(application: Application) : AndroidViewModel(applicatio
         pauseTimer()
         _uiState.value = _uiState.value.copy(
             focusMood = mood,
+            sessionType = SessionType.FOCUS,
             timerSecondsRemaining = mood.minutes * 60,
             isTimerRunning = false
         )
@@ -252,7 +255,7 @@ class CodeGuideViewModel(application: Application) : AndroidViewModel(applicatio
                 )
             }
             if (_uiState.value.timerSecondsRemaining <= 0) {
-                completeFocusBlock()
+                completeCurrentBlock()
             }
         }
     }
@@ -262,9 +265,18 @@ class CodeGuideViewModel(application: Application) : AndroidViewModel(applicatio
         _uiState.value = _uiState.value.copy(isTimerRunning = false)
     }
 
+    fun completeCurrentBlock() {
+        if (_uiState.value.sessionType == SessionType.FOCUS) {
+            completeFocusBlock()
+        } else {
+            completeBreakBlock()
+        }
+    }
+
     fun completeFocusBlock() {
         pauseTimer()
         _uiState.value = _uiState.value.copy(
+            sessionType = SessionType.FOCUS,
             completedBlocksCount = _uiState.value.completedBlocksCount + 1,
             totalFocusMinutes = _uiState.value.totalFocusMinutes + _uiState.value.focusMood.minutes,
             timerSecondsRemaining = _uiState.value.focusMood.minutes * 60,
@@ -273,10 +285,21 @@ class CodeGuideViewModel(application: Application) : AndroidViewModel(applicatio
         persistState()
     }
 
+    fun completeBreakBlock() {
+        pauseTimer()
+        _uiState.value = _uiState.value.copy(
+            sessionType = SessionType.FOCUS,
+            timerSecondsRemaining = _uiState.value.focusMood.minutes * 60
+        )
+        persistState()
+    }
+
     fun startBreak(minutes: Int = 5) {
         pauseTimer()
         _uiState.value = _uiState.value.copy(
-            timerSecondsRemaining = minutes * 60
+            sessionType = SessionType.BREAK,
+            timerSecondsRemaining = minutes * 60,
+            isTimerRunning = false
         )
         startTimer()
     }

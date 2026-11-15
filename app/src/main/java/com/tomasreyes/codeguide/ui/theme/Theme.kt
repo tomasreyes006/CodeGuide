@@ -1,52 +1,28 @@
 package com.tomasreyes.codeguide.ui.theme
 
-import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
+import androidx.compose.ui.graphics.Color
 
-private val LightColorScheme = lightColorScheme(
-    primary = CodeGuideNavy,
-    onPrimary = CodeGuideSurface,
-    primaryContainer = CodeGuideNavyLight,
-    onPrimaryContainer = CodeGuideSurface,
-    secondary = CodeGuideTeal,
-    onSecondary = CodeGuideSurface,
-    secondaryContainer = CodeGuideTealLight,
-    onSecondaryContainer = CodeGuideTeal,
-    tertiary = CodeGuideCyan,
-    background = CodeGuideBackground,
-    onBackground = CodeGuideTextPrimary,
-    surface = CodeGuideSurface,
-    onSurface = CodeGuideTextPrimary,
-    surfaceVariant = CodeGuidePasskeyBg,
-    onSurfaceVariant = CodeGuideTextSecondary,
-    outline = CodeGuideBorder
+// Paleta de colores para el Modo Oscuro
+private val DarkColorScheme = darkColorScheme(
+    primary = Color(0xFFD0BCFF),
+    secondary = Color(0xFFCCC2DC),
+    tertiary = Color(0xFFEFB8C8),
+    background = Color(0xFF1C1B1F),
+    surface = Color(0xFF1C1B1F)
 )
 
-private val DarkColorScheme = darkColorScheme(
-    primary = CodeGuideTealBright,
-    onPrimary = CodeGuideNavy,
-    primaryContainer = CodeGuideDarkPasskeyBg,
-    onPrimaryContainer = CodeGuideDarkTextPrimary,
-    secondary = CodeGuideCyan,
-    onSecondary = CodeGuideNavy,
-    secondaryContainer = CodeGuideDarkBadgeBg,
-    onSecondaryContainer = CodeGuideTealBright,
-    tertiary = CodeGuideCyan,
-    background = CodeGuideDarkBackground,
-    onBackground = CodeGuideDarkTextPrimary,
-    surface = CodeGuideDarkSurface,
-    onSurface = CodeGuideDarkTextPrimary,
-    surfaceVariant = CodeGuideDarkPasskeyBg,
-    onSurfaceVariant = CodeGuideDarkTextSecondary,
-    outline = CodeGuideDarkBorder
+// Paleta de colores para el Modo Claro
+private val LightColorScheme = lightColorScheme(
+    primary = Color(0xFF6650a4),
+    secondary = Color(0xFF625b71),
+    tertiary = Color(0xFF7D5260),
+    background = Color(0xFFFFFBFE),
+    surface = Color(0xFFFFFBFE)
 )
 
 @Composable
@@ -54,20 +30,14 @@ fun CodeGuideTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
-
-    val view = LocalView.current
-    if (!view.isInEditMode) {
-        SideEffect {
-            val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.background.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-        }
+    val colorScheme = if (darkTheme) {
+        DarkColorScheme
+    } else {
+        LightColorScheme
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
         content = content
     )
 }

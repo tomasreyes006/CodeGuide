@@ -52,3 +52,9 @@ enum class AmbientAudio(val label: String) {
     RAIN("Lluvia suave"),
     SILENCE("Silencio")
 }
+
+enum class SessionType(val label: String) {
+    FOCUS("Enfoque"),
+    BREAK("Descanso")
+}
+
