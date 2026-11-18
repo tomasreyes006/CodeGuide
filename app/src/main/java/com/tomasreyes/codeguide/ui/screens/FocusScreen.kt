@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Coffee
@@ -34,18 +35,29 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.VolumeOff
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,6 +67,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -63,6 +76,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tomasreyes.codeguide.R
+import com.tomasreyes.codeguide.data.FocusAudioPlayer
 import com.tomasreyes.codeguide.data.model.AmbientAudio
 import com.tomasreyes.codeguide.data.model.FocusMood
 import com.tomasreyes.codeguide.data.model.SessionType
@@ -85,6 +99,54 @@ fun FocusScreen(
     onNavigateToProfile: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    val context = LocalContext.current
+    val audioPlayer = remember { FocusAudioPlayer(context) }
+
+    var isAudioPlaying by remember { mutableStateOf(false) }
+    var audioVolume by remember { mutableFloatStateOf(0.7f) }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            audioPlayer.release()
+        }
+    }
+
+    fun handleAudioSelected(audio: AmbientAudio) {
+        viewModel.selectAmbientAudio(audio)
+        val resId = audio.rawResId
+        if (resId != null) {
+            audioPlayer.play(resId)
+            audioPlayer.setVolume(audioVolume)
+            isAudioPlaying = true
+        } else {
+            audioPlayer.stop()
+            isAudioPlaying = false
+        }
+    }
+
+    fun handleTogglePlayPause() {
+        if (isAudioPlaying) {
+            audioPlayer.pause()
+            isAudioPlaying = false
+        } else {
+            val currentResId = uiState.activeAudio.rawResId
+            if (currentResId != null) {
+                if (audioPlayer.currentRawResId == currentResId) {
+                    audioPlayer.resume()
+                } else {
+                    audioPlayer.play(currentResId)
+                    audioPlayer.setVolume(audioVolume)
+                }
+                isAudioPlaying = true
+            }
+        }
+    }
+
+    fun handleVolumeChange(newVolume: Float) {
+        audioVolume = newVolume
+        audioPlayer.setVolume(newVolume)
+    }
 
     Scaffold(
         bottomBar = {
@@ -144,10 +206,14 @@ fun FocusScreen(
                     onTakeBreak = { viewModel.startBreak(5) }
                 )
 
-                // 7. Audio Selector
+                // 7. Audio Selector y Controles
                 AmbientAudioCard(
                     selectedAudio = uiState.activeAudio,
-                    onAudioSelected = { audio -> viewModel.selectAmbientAudio(audio) }
+                    isPlaying = isAudioPlaying,
+                    volume = audioVolume,
+                    onAudioSelected = { audio -> handleAudioSelected(audio) },
+                    onTogglePlayPause = { handleTogglePlayPause() },
+                    onVolumeChange = { vol -> handleVolumeChange(vol) }
                 )
 
                 // 8. Cita
@@ -690,7 +756,11 @@ private fun FocusControlButtons(
 @Composable
 private fun AmbientAudioCard(
     selectedAudio: AmbientAudio,
-    onAudioSelected: (AmbientAudio) -> Unit
+    isPlaying: Boolean,
+    volume: Float,
+    onAudioSelected: (AmbientAudio) -> Unit,
+    onTogglePlayPause: () -> Unit,
+    onVolumeChange: (Float) -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -759,6 +829,110 @@ private fun AmbientAudioCard(
                     isSelected = selectedAudio == AmbientAudio.SILENCE,
                     onClick = { onAudioSelected(AmbientAudio.SILENCE) }
                 )
+            }
+
+            if (selectedAudio.rawResId != null) {
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = onTogglePlayPause,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isPlaying) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primary
+                        ),
+                        modifier = Modifier.height(40.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                contentDescription = if (isPlaying) "Pausar" else "Reproducir",
+                                tint = if (isPlaying) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = if (isPlaying) "Pausar Audio" else "Reproducir",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isPlaying) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.Repeat,
+                                contentDescription = "Repetición",
+                                tint = CodeGuideTeal,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Bucle Continuo",
+                                fontSize = 10.sp,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold,
+                                color = CodeGuideTeal
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = if (volume > 0f) Icons.AutoMirrored.Filled.VolumeUp else Icons.AutoMirrored.Filled.VolumeOff,
+                                contentDescription = "Volumen",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Volumen de ambiente",
+                                fontSize = 11.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Text(
+                            text = "${(volume * 100).toInt()}%",
+                            fontSize = 11.sp,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    Slider(
+                        value = volume,
+                        onValueChange = onVolumeChange,
+                        valueRange = 0f..1f,
+                        colors = SliderDefaults.colors(
+                            thumbColor = MaterialTheme.colorScheme.primary,
+                            activeTrackColor = CodeGuideTeal,
+                            inactiveTrackColor = MaterialTheme.colorScheme.outline
+                        )
+                    )
+                }
             }
         }
     }

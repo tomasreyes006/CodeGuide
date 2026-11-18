@@ -1,5 +1,6 @@
 package com.tomasreyes.codeguide.data.model
 
+import com.tomasreyes.codeguide.R
 import java.util.UUID
 
 enum class ProjectStatus(val label: String) {
@@ -47,10 +48,10 @@ enum class FocusMood(val title: String, val minutes: Int, val emoji: String) {
     LIGERO("Ligero / Fatiga", 15, "☕")
 }
 
-enum class AmbientAudio(val label: String) {
-    LOFI("Lofi Coding"),
-    RAIN("Lluvia suave"),
-    SILENCE("Silencio")
+enum class AmbientAudio(val label: String, val rawResId: Int?) {
+    LOFI("Lofi Coding", R.raw.lofidos),
+    RAIN("Lluvia suave", R.raw.lluviados),
+    SILENCE("Silencio", null)
 }
 
 enum class SessionType(val label: String) {

@@ -67,5 +67,5 @@ dependencies {
     implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
     implementation("com.google.code.gson:gson:2.10.1")
-
+    implementation("androidx.media3:media3-exoplayer:1.11.1")
 }
